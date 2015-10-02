@@ -21,7 +21,8 @@ class MonitorDataInputStream extends InputStream {
         kbits = 0;
     }
 
-    public int read() throws IOException {
+    @Override
+	public int read() throws IOException {
         long start = 0;
         if (monitoring)
             start = System.currentTimeMillis();
@@ -42,7 +43,8 @@ class MonitorDataInputStream extends InputStream {
         return i;
     }
 
-    public int read(byte[] b, int off, int len) throws IOException {
+    @Override
+	public int read(byte[] b, int off, int len) throws IOException {
         long start = 0;
         if (monitoring) {
             start = System.currentTimeMillis();
@@ -64,31 +66,38 @@ class MonitorDataInputStream extends InputStream {
         return i;
     }
 
-    public int read(byte[] b) throws IOException {
+    @Override
+	public int read(byte[] b) throws IOException {
         return read(b, 0, b.length);
     }
 
-    public int available() throws IOException {
+    @Override
+	public int available() throws IOException {
         return underlying.available();
     }
 
-    public void close() throws IOException {
+    @Override
+	public void close() throws IOException {
         underlying.close();
     }
 
-    public synchronized void mark(int readlimit) {
+    @Override
+	public synchronized void mark(int readlimit) {
         underlying.mark(readlimit);
     }
 
-    public boolean markSupported() {
+    @Override
+	public boolean markSupported() {
         return underlying.markSupported();
     }
 
-    public synchronized void reset() throws IOException {
+    @Override
+	public synchronized void reset() throws IOException {
         underlying.reset();
     }
 
-    public long skip(long n) throws IOException {
+    @Override
+	public long skip(long n) throws IOException {
         return underlying.skip(n);
     }
 

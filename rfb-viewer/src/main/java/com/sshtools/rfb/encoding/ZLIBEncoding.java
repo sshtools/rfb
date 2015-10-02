@@ -17,20 +17,22 @@ public class ZLIBEncoding extends AbstractRawEncoding {
 	public ZLIBEncoding() {
 	}
 
+	@Override
 	public int getType() {
 		return 6;
 	}
 
+	@Override
 	public boolean isPseudoEncoding() {
 		return false;
 	}
 
+	@Override
 	public void processEncodedRect(RFBDisplay display, int x, int y, int width,
 			int height, int encodingType) throws IOException {
 		try {
 			ProtocolEngine engine = display.getEngine();
 			RFBDisplayModel model = display.getDisplayModel();
-			int bytesPerPixel = model.getBitsPerPixel() / 8;
 			DataInputStream in = engine.getInputStream();
 			int length = in.readInt();
 			if (buffer == null || length > bufferLength) {
@@ -46,24 +48,15 @@ public class ZLIBEncoding extends AbstractRawEncoding {
 
 			int bufspace = ( width * height * model.getBytesPerPixel() ) + length;
 			byte[] buf = new byte[bufspace];
-			int decomp = inflater.inflate(buf);
+			inflater.inflate(buf);
 			doProcessRaw(display, x, y, width, height, buf);
-
-			// byte[] buf = new byte[width * bytesPerPixel];
-			// for (int i = y; i < y + height; i++) {
-			// inflater.inflate(buf);
-			// doProcessRaw(display, x, i, width, 1, buf);
-			// }
-
-			// model.transferUpdatedRect(x, y, width, height);
-			// display.requestRepaint(display.getContext().getScreenUpdateTimeout(),
-			// x, y, width, height);
 		} catch (DataFormatException ex) {
 			ex.printStackTrace();
 			throw new IOException(ex.getMessage());
 		}
 	}
 
+	@Override
 	public String getName() {
 		return "ZLIB";
 	}

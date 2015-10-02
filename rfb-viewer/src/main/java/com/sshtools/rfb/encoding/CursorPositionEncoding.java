@@ -15,7 +15,8 @@ public class CursorPositionEncoding implements RFBEncoding {
      * @return int
      * @todo Implement this com.sshtools.rfb.RFBEncoding method
      */
-    public int getType() {
+    @Override
+	public int getType() {
         return 0xffffff18;
     }
 
@@ -25,7 +26,8 @@ public class CursorPositionEncoding implements RFBEncoding {
      * @return boolean
      * @todo Implement this com.sshtools.rfb.RFBEncoding method
      */
-    public boolean isPseudoEncoding() {
+    @Override
+	public boolean isPseudoEncoding() {
         return true;
     }
 
@@ -41,7 +43,8 @@ public class CursorPositionEncoding implements RFBEncoding {
      * @throws IOException
      * @todo Implement this com.sshtools.rfb.RFBEncoding method
      */
-    public void processEncodedRect(RFBDisplay display, int x, int y, int width,
+    @Override
+	public void processEncodedRect(RFBDisplay display, int x, int y, int width,
                                    int height, int encodingType) throws
             IOException {
         display.getDisplayModel().softCursorMove(x, y);
@@ -56,7 +59,8 @@ public class CursorPositionEncoding implements RFBEncoding {
      * 
      * @see com.sshtools.rfb.RFBEncoding#getName()
      */
-    public String getName() {
+    @Override
+	public String getName() {
         return "Cursor Position";
     }
 }

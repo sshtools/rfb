@@ -35,20 +35,20 @@
 		</plugins>
 	</build>
 	<dependencies>
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>ui</artifactId>
 			<version>${project.version}</version>
 			<type>jar</type>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
+		</dependency> -->
+		<!-- <dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>virtualsession</artifactId>
 			<version>${project.version}</version>
 			<type>jar</type>
 			<scope>compile</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>rfb-common</artifactId>

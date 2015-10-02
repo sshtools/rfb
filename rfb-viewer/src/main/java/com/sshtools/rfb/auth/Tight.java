@@ -8,8 +8,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sshtools.profile.AuthenticationException;
 import com.sshtools.rfb.ProtocolEngine;
+import com.sshtools.rfb.RFBAuthenticationException;
 import com.sshtools.rfb.SecurityType;
 import com.sshtools.rfbcommon.ProtocolReader;
 import com.sshtools.rfbcommon.RFBConstants;
@@ -22,7 +22,8 @@ public class Tight implements SecurityType {
     private List<TightCapability> clientCapabilities = new ArrayList<TightCapability>();
     private List<TightCapability> serverEncodings = new ArrayList<TightCapability>();
 
-    public int process(ProtocolEngine engine) throws AuthenticationException, IOException {
+    @Override
+	public int process(ProtocolEngine engine) throws RFBAuthenticationException, IOException {
         int authScheme = RFBConstants.SCHEME_NO_AUTHENTICATION;
         processTunnels(engine);
         authScheme = processAuth(engine, authScheme);
@@ -57,7 +58,8 @@ public class Tight implements SecurityType {
         return authScheme;
     }
 
-    public int getType() {
+    @Override
+	public int getType() {
         return RFBConstants.SCHEME_TIGHT_AUTHENTICATION;
     }
 
@@ -66,13 +68,14 @@ public class Tight implements SecurityType {
         return "Tight";
     }
 
-    public void postServerInitialisation(ProtocolEngine engine) throws IOException {
+    @Override
+	public void postServerInitialisation(ProtocolEngine engine) throws IOException {
         LOG.info("Reading Tight Capabilities");
         ProtocolReader in = engine.getInputStream();
         int serverMessages = in.readUnsignedShort();
         int clientMessages = in.readUnsignedShort();
         int encodings = in.readUnsignedShort();
-        int pad = in.readUnsignedShort();
+        in.readUnsignedShort(); // pad
         for (int i = 0; i < serverMessages; i++) {
             TightCapability c = new TightCapability(in);
             serverCapabilities.add(c);
@@ -91,7 +94,7 @@ public class Tight implements SecurityType {
     }
 
     private void processTunnels(ProtocolEngine engine) throws IOException {
-        int numberOfTunnels = (int) engine.getInputStream().readInt();
+        int numberOfTunnels = engine.getInputStream().readInt();
         if (numberOfTunnels != 0) {
             int selectedTunnelType = -1;
             for (int i = 0; i < numberOfTunnels; i++) {
@@ -108,7 +111,8 @@ public class Tight implements SecurityType {
         }
     }
 
-    public List<Integer> getSubAuthTypes() {
+    @Override
+	public List<Integer> getSubAuthTypes() {
         return Arrays.asList(RFBConstants.SCHEME_CONNECT_FAILED, RFBConstants.SCHEME_NO_AUTHENTICATION,
             RFBConstants.SCHEME_VNC_AUTHENTICATION);
     }

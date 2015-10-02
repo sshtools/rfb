@@ -58,10 +58,12 @@ public class TightEncoding extends AbstractRawEncoding {
 	public TightEncoding() {
 	}
 
+	@Override
 	public int getType() {
 		return 7;
 	}
 
+	@Override
 	public void processEncodedRect(RFBDisplay display, int x, int y, int width,
 			int height, int encodingType) throws IOException {
 		this.display = display;
@@ -98,10 +100,12 @@ public class TightEncoding extends AbstractRawEncoding {
 				x, y, width, height);
 	}
 
+	@Override
 	public String getName() {
 		return "Tight";
 	}
 
+	@Override
 	public boolean isPseudoEncoding() {
 		return false;
 	}
@@ -204,6 +208,7 @@ public class TightEncoding extends AbstractRawEncoding {
 					+ " with " + color);
 		}
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				Graphics g = rfbModel.getGraphicBuffer();
 				g.setColor(color);

@@ -7,12 +7,10 @@ import java.io.InputStream;
 
 public class RecordingInputStream extends FilterInputStream {
 
-	private InputStream in;
 	private DataOutputStream rec;
 
 	public RecordingInputStream(InputStream in, DataOutputStream rec) {
 		super(in);
-		this.in = in;
 		this.rec = rec;
 	}
 

@@ -23,7 +23,8 @@ public class RFBSocketTransport
     super(hostname, port);
   }
 
-  public String getHostname() {
+  @Override
+public String getHostname() {
     return getInetAddress().getHostName();
   }
 

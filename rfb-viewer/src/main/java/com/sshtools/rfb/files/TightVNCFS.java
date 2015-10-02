@@ -7,9 +7,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -48,13 +46,13 @@ public class TightVNCFS implements RFBFS {
 			RFBConstants.CAP_FTCMDRST, RFBConstants.CAP_FTCFRRST,
 			RFBConstants.CAP_FTCFMRST, RFBConstants.CAP_FTCDSRST };
 
-	private BlockingQueue queue = new ArrayBlockingQueue(1000, true);
-	private Map fileMap = new HashMap();
+	private BlockingQueue<Object> queue = new ArrayBlockingQueue<Object>(1000, true);
 
 	public TightVNCFS(ProtocolEngine protocolEngine) {
 		this.protocolEngine = protocolEngine;
 	}
 
+	@Override
 	public boolean isActive() {
 	    Tight tight = null;
 	    for(SecurityType t : protocolEngine.getSecurityTypes()) {
@@ -83,6 +81,7 @@ public class TightVNCFS implements RFBFS {
 		return active;
 	}
 
+	@Override
 	public synchronized boolean mkdir(String filename) throws IOException {
 		ProtocolWriter outputStream = protocolEngine.getOutputStream();
 		synchronized (outputStream) {
@@ -93,6 +92,7 @@ public class TightVNCFS implements RFBFS {
 		return (Boolean) waitTillReceived();
 	}
 
+	@Override
 	public boolean rm(String filename) throws IOException {
 		ProtocolWriter outputStream = protocolEngine.getOutputStream();
 		synchronized (outputStream) {
@@ -103,6 +103,7 @@ public class TightVNCFS implements RFBFS {
 		return (Boolean) waitTillReceived();
 	}
 
+	@Override
 	public void mv(String oldName, String newName) throws IOException {
 		ProtocolWriter outputStream = protocolEngine.getOutputStream();
 		synchronized (outputStream) {
@@ -114,6 +115,7 @@ public class TightVNCFS implements RFBFS {
 		waitTillReceived();
 	}
 
+	@Override
 	public InputStream receive(String path, long offset) throws IOException {
 		final ProtocolWriter outputStream = protocolEngine.getOutputStream();
 		synchronized (outputStream) {
@@ -153,6 +155,7 @@ public class TightVNCFS implements RFBFS {
 		};
 	}
 
+	@Override
 	public OutputStream send(String path, boolean overwrite, long offset)
 			throws IOException {
 		final ProtocolWriter outputStream = protocolEngine.getOutputStream();
@@ -199,6 +202,7 @@ public class TightVNCFS implements RFBFS {
 		};
 	}
 
+	@Override
 	public synchronized RFBFile[] list(String filename) throws IOException {
 		ProtocolWriter outputStream = protocolEngine.getOutputStream();
 		synchronized (outputStream) {
@@ -210,6 +214,7 @@ public class TightVNCFS implements RFBFS {
 		return (RFBFile[]) waitTillReceived();
 	}
 
+	@Override
 	public synchronized RFBFile stat(String filename) throws IOException {
 		String dir = filename;
 		String base = null;
@@ -232,6 +237,7 @@ public class TightVNCFS implements RFBFS {
 		return null;
 	}
 
+	@Override
 	public boolean handleReply(int code) throws IOException {
 		if (code != RFBConstants.SMSG_TIGHT_FILETRANSFER) {
 			return false;
@@ -272,7 +278,7 @@ public class TightVNCFS implements RFBFS {
 
 	private void endReceive() throws IOException {
 		DataInputStream inputStream = protocolEngine.getInputStream();
-		int flags = inputStream.read();
+		inputStream.read(); // flags
 		received(inputStream.readLong());
 	}
 
@@ -288,16 +294,17 @@ public class TightVNCFS implements RFBFS {
 	}
 
 	private void readDir() throws IOException {
-		List l = new ArrayList();
+		List<RFBFile> l = new ArrayList<RFBFile>();
 		DataInputStream inputStream = protocolEngine.getInputStream();
-		int compression = inputStream.read();
-		int compresedSize = inputStream.readInt();
+		inputStream.read(); // compression
+		inputStream.readInt(); // compresse  size
 		int uncompressedSize = inputStream.readInt();
 		byte[] buf = new byte[uncompressedSize];
 		inputStream.readFully(buf);
 
 		ByteArrayInputStream bin = new ByteArrayInputStream(buf);
 		ProtocolReader pr = new ProtocolReader(bin);
+		try {
 		int files = pr.readInt();
 		for (int i = 0; i < files; i++) {
 			long size = pr.readLong();
@@ -306,6 +313,10 @@ public class TightVNCFS implements RFBFS {
 			String name = pr.readSizedUTF8();
 			l.add(new DefaultRFBFile((flags & 0x1) != 0, size, name, flags, 0,
 					0, lastMod));
+		}
+		}
+		finally {
+			pr.close();
 		}
 
 		// TODO compression

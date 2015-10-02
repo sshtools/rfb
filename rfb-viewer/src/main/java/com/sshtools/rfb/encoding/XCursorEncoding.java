@@ -11,112 +11,83 @@ public class XCursorEncoding implements RFBEncoding {
 	public XCursorEncoding() {
 	}
 
-	/**
-	 * getType
-	 * 
-	 * @return int
-	 * @todo Implement this com.sshtools.rfb.RFBEncoding method
-	 */
+	@Override
 	public int getType() {
 		return 0xffffff10;
 	}
 
-	/**
-	 * isPseudoEncoding
-	 * 
-	 * @return boolean
-	 * @todo Implement this com.sshtools.rfb.RFBEncoding method
-	 */
+	@Override
 	public boolean isPseudoEncoding() {
 		return true;
 	}
 
-	/**
-	 * processEncodedRect
-	 * 
-	 * @param display RFBDisplay
-	 * @param x int
-	 * @param y int
-	 * @param width int
-	 * @param height int
-	 * @param encodingType int
-	 * @throws IOException
-	 * @todo Implement this com.sshtools.rfb.RFBEncoding method
-	 */
-	public void processEncodedRect(RFBDisplay display, int x2, int y2, int width,
-                                   int height, int encodingType) throws
-            IOException {
+	@Override
+	public void processEncodedRect(RFBDisplay display, int x2, int y2,
+			int width, int height, int encodingType) throws IOException {
 
-        int bytesPerRow = (width + 7) / 8;
-        int bytesMaskData = bytesPerRow * height;
-        DataInputStream in = display.getEngine().getInputStream();
+		int bytesPerRow = (width + 7) / 8;
+		int bytesMaskData = bytesPerRow * height;
+		DataInputStream in = display.getEngine().getInputStream();
 
-        if(width * height == 0) {
-          return;
-        }
-        
-        if (display.getContext().isCursorUpdateIgnored()) {
-            in.skipBytes(6 + bytesMaskData * 2 );
-        } else {
-        	
-        	// An image with alpha to draw the cursor on
-        	BufferedImage bim  =new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		if (width * height == 0) {
+			return;
+		}
 
-            // Read foreground and background colors of the cursor.
-            byte[] rgb = new byte[6];
-            in.readFully(rgb);
-            int[] colors = {(0xFF000000 | (rgb[3] & 0xFF) << 16 |
-                             (rgb[4] & 0xFF) << 8 | (rgb[5] & 0xFF)),
-                           (0xFF000000 | (rgb[0] & 0xFF) << 16 |
-                            (rgb[1] & 0xFF) << 8 | (rgb[2] & 0xFF))};
+		if (display.getContext().isCursorUpdateIgnored()) {
+			in.skipBytes(6 + bytesMaskData * 2);
+		} else {
 
-            // Read pixel and mask data.
-            byte[] pixBuf = new byte[bytesMaskData];
-            in.readFully(pixBuf);
-            byte[] maskBuf = new byte[bytesMaskData];
-            in.readFully(maskBuf);
-            
-            // Decode pixel data into image
-            byte pixByte, maskByte;
-            int dx, dy, n, result;
-            int i;
-            for (dy = 0; dy < height; dy++) {
-            	i = 0;
-                for (dx = 0; dx < width / 8; dx++) {
-                    pixByte = pixBuf[dy * bytesPerRow + dx];
-                    maskByte = maskBuf[dy * bytesPerRow + dx];
-                    for (n = 7; n >= 0; n--) {
-                        if ((maskByte >> n & 1) != 0) {
-                        	bim.setRGB(i, dy, colors[pixByte >> n & 1]);
-                        } else {
-                        	bim.setRGB(i, dy, 0xff000000);
-                        }
-                        i++;
-                    }
-                }
-                for (n = 7; n >= 8 - width % 8; n--) {
-                    if ((maskBuf[dy * bytesPerRow + dx] >> n & 1) != 0) {
-                    	bim.setRGB(i, dy, colors[pixBuf[dy * bytesPerRow + dx] >> n & 1]);
-                    } else {
-                    	bim.setRGB(i, dy, 0xff000000);
-                    }
-                }
-            }
+			// An image with alpha to draw the cursor on
+			BufferedImage bim = new BufferedImage(width, height,
+					BufferedImage.TYPE_INT_ARGB);
 
-            display.getDisplayModel().updateCursor(bim,
-                    x2,
-                    y2,
-                    width,
-                    height);
-        }
+			// Read foreground and background colors of the cursor.
+			byte[] rgb = new byte[6];
+			in.readFully(rgb);
+			int[] colors = {
+					(0xFF000000 | (rgb[3] & 0xFF) << 16 | (rgb[4] & 0xFF) << 8 | (rgb[5] & 0xFF)),
+					(0xFF000000 | (rgb[0] & 0xFF) << 16 | (rgb[1] & 0xFF) << 8 | (rgb[2] & 0xFF)) };
 
-    }
+			// Read pixel and mask data.
+			byte[] pixBuf = new byte[bytesMaskData];
+			in.readFully(pixBuf);
+			byte[] maskBuf = new byte[bytesMaskData];
+			in.readFully(maskBuf);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.sshtools.rfb.RFBEncoding#getName()
-	 */
+			// Decode pixel data into image
+			byte pixByte, maskByte;
+			int dx, dy, n;
+			int i;
+			for (dy = 0; dy < height; dy++) {
+				i = 0;
+				for (dx = 0; dx < width / 8; dx++) {
+					pixByte = pixBuf[dy * bytesPerRow + dx];
+					maskByte = maskBuf[dy * bytesPerRow + dx];
+					for (n = 7; n >= 0; n--) {
+						if ((maskByte >> n & 1) != 0) {
+							bim.setRGB(i, dy, colors[pixByte >> n & 1]);
+						} else {
+							bim.setRGB(i, dy, 0xff000000);
+						}
+						i++;
+					}
+				}
+				for (n = 7; n >= 8 - width % 8; n--) {
+					if ((maskBuf[dy * bytesPerRow + dx] >> n & 1) != 0) {
+						bim.setRGB(i, dy,
+								colors[pixBuf[dy * bytesPerRow + dx] >> n & 1]);
+					} else {
+						bim.setRGB(i, dy, 0xff000000);
+					}
+				}
+			}
+
+			display.getDisplayModel().updateCursor(bim, x2, y2, width, height);
+		}
+
+	}
+
+	@Override
 	public String getName() {
 		return "X Cursor";
 	}

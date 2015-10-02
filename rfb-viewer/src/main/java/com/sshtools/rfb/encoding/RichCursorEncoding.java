@@ -12,14 +12,17 @@ public class RichCursorEncoding extends AbstractRawEncoding {
 	public RichCursorEncoding() {
 	}
 
+	@Override
 	public int getType() {
 		return RFBConstants.ENC_RICH_CURSOR;
 	}
 
+	@Override
 	public boolean isPseudoEncoding() {
 		return true;
 	}
 
+	@Override
 	public void processEncodedRect(RFBDisplay display, int hotx, int hoty,
 			int width, int height, int encodingType) throws IOException {
 		int bytesPerRow = (width + 7) / 8;
@@ -93,6 +96,7 @@ public class RichCursorEncoding extends AbstractRawEncoding {
 	 * 
 	 * @see com.sshtools.rfb.RFBEncoding#getName()
 	 */
+	@Override
 	public String getName() {
 		return "Rich Cursor";
 	}

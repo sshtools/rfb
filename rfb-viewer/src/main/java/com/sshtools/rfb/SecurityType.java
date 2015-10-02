@@ -3,11 +3,9 @@ package com.sshtools.rfb;
 import java.io.IOException;
 import java.util.List;
 
-import com.sshtools.profile.AuthenticationException;
-
 public interface SecurityType {
 
-	int process(ProtocolEngine engine) throws AuthenticationException,
+	int process(ProtocolEngine engine) throws RFBAuthenticationException,
 			IOException;
 
 	int getType();

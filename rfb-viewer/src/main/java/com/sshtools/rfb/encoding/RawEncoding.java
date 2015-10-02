@@ -12,14 +12,17 @@ public class RawEncoding extends AbstractRawEncoding {
 	public RawEncoding() {
 	}
 
+	@Override
 	public int getType() {
 		return 0;
 	}
 
+	@Override
 	public boolean isPseudoEncoding() {
 		return false;
 	}
 
+	@Override
 	public void processEncodedRect(RFBDisplay display, int x, int y, int width, int height, int encodingType) throws IOException {
 		ProtocolEngine engine = display.getEngine();
 		RFBDisplayModel model = display.getDisplayModel();
@@ -32,6 +35,7 @@ public class RawEncoding extends AbstractRawEncoding {
 		display.requestRepaint(display.getContext().getScreenUpdateTimeout(), x, y, width, height);
 	}
 
+	@Override
 	public String getName() {
 		return "Raw";
 	}

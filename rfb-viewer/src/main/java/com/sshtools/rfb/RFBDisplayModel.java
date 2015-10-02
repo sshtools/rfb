@@ -10,9 +10,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DataBufferUShort;
 import java.awt.image.ImageObserver;
 
 import javax.swing.SwingUtilities;
@@ -46,9 +43,6 @@ public class RFBDisplayModel extends PixelFormat {
 	private int cursorWidth, cursorHeight;
 	private int hotX, hotY;
 	private RFBContext context;
-	private int rmask;
-	private int gmask;
-	private int bmask;
 	private BufferedImage lastRect;
 	private Object lock = new Object();
 
@@ -187,32 +181,18 @@ public class RFBDisplayModel extends PixelFormat {
 		}
 	}
 
-	/**
-	 * @return Returns the imagex.
-	 */
 	public int getImagex() {
 		return imagex;
 	}
 
-	/**
-	 * @param imagex
-	 *            The imagex to set.
-	 */
 	public void setImagex(int imagex) {
 		this.imagex = imagex;
 	}
 
-	/**
-	 * @return Returns the imagey.
-	 */
 	public int getImagey() {
 		return imagey;
 	}
 
-	/**
-	 * @param imagey
-	 *            The imagey to set.
-	 */
 	public void setImagey(int imagey) {
 		this.imagey = imagey;
 	}
@@ -267,13 +247,6 @@ public class RFBDisplayModel extends PixelFormat {
 			int imagex, int imagey, double xscale, double yscale, int scaleMode) {
 
 		if (scaleMode != RFBDisplay.NO_SCALING) {
-			// #ifdef JAVA1
-			/*
-			 * g.drawImage(imageBuffer, imagex, imagey,
-			 * (int)(imageBuffer.getWidth(imageObserver) * xscale),
-			 * (int)(imageBuffer.getHeight(imageObserver) * yscale), null);
-			 */
-			// #else
 			switch (scaleMode) {
 			case RFBDisplay.BILINEAR:
 				((java.awt.Graphics2D) g).setRenderingHint(
@@ -295,7 +268,6 @@ public class RFBDisplayModel extends PixelFormat {
 			g.drawImage(imageBuffer, imagex, imagey,
 					(int) (imageBuffer.getWidth(imageObserver) * xscale),
 					(int) (imageBuffer.getHeight(imageObserver) * yscale), null);
-			// #endif JAVA1
 		} else {
 			g.drawImage(imageBuffer, imagex, imagey,
 					imageBuffer.getWidth(imageObserver),
@@ -400,6 +372,7 @@ public class RFBDisplayModel extends PixelFormat {
 			final int height, final int color) {
 		if (!SwingUtilities.isEventDispatchThread()) {
 			SwingUtilities.invokeLater(new Runnable() {
+				@Override
 				public void run() {
 					drawRectangle(x, y, width, height, color);
 				}
@@ -414,15 +387,6 @@ public class RFBDisplayModel extends PixelFormat {
 
 	public void drawRectangle(final int x, final int y, final int width,
 			final int height, BufferedImage bim) {
-//		if (!SwingUtilities.isEventDispatchThread()) {
-//			final BufferedImage fbim = bim;
-//			SwingUtilities.invokeLater(new Runnable() {
-//				public void run() {
-//					drawRectangle(x, y, width, height, fbim);
-//				}
-//			});
-//			return;
-//		}
 		if (bim == null) {
 			bim = lastRect;
 		} else {

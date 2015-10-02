@@ -13,7 +13,6 @@ import com.sshtools.rfb.RFBTransport;
 
 public class RecordingTransport implements RFBTransport {
 
-	private File outputFile;
 	private RFBTransport underlyingTransport;
 	private RecordingInputStream in;
 	private DataOutputStream recordStream;
@@ -21,7 +20,6 @@ public class RecordingTransport implements RFBTransport {
 
 	public RecordingTransport(RFBContext context, File outputFile, RFBTransport underlyingTransport)
 			throws IOException {
-		this.outputFile = outputFile;
 		this.underlyingTransport = underlyingTransport;
 
 		

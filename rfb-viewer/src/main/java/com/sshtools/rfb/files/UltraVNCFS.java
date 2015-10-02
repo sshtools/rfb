@@ -23,7 +23,6 @@ public class UltraVNCFS implements RFBFS {
 	private int waitingOn = -1;
 	private Object wait = new Object();
 	private Object received = null;
-	private RFBFileSystemMessage onReceipt;
 	private boolean readingDirectory;
 	private String cachedPath;
 	// Requests
@@ -46,16 +45,19 @@ public class UltraVNCFS implements RFBFS {
 		this.protocolEngine = protocolEngine;
 	}
 
+	@Override
 	public boolean isActive() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+	@Override
 	public synchronized boolean mkdir(String filename) throws IOException {
 		writeDirRequest(RFB_COMMAND, RFB_DIR_CREATE, filename);
 		return ((Boolean) waitTillReceived()).booleanValue();
 	}
 
+	@Override
 	public synchronized RFBFile[] list(String filename) throws IOException {
 		writeDirRequest(RFB_DIR_CONTENT_REQUEST, RFB_DIR_CONTENT,
 				addTrailingSlash(filename));
@@ -69,6 +71,7 @@ public class UltraVNCFS implements RFBFS {
 		return filename;
 	}
 
+	@Override
 	public synchronized RFBFile stat(String filename) throws IOException {
 		String path = convertFilename(filename);
 		while (path.endsWith("\\") && path.length() > 1) {
@@ -155,13 +158,16 @@ public class UltraVNCFS implements RFBFS {
 		return filename.replace('/', '\\') + "\0";
 	}
 
+	@Override
 	public boolean rm(String processPath) throws IOException {
 		return false;
 	}
 
+	@Override
 	public void mv(String oldName, String newName) throws IOException {
 	}
 
+	@Override
 	public boolean handleReply(int code) throws IOException {
 		DataInputStream inputStream = protocolEngine.getInputStream();
 		int type = inputStream.readUnsignedByte();
@@ -179,6 +185,7 @@ public class UltraVNCFS implements RFBFS {
 		return false;
 	}
 
+	@Override
 	public OutputStream send(String path, boolean overwrite, long offset) {
 		// TODO Auto-generated method stub
 		return null;
@@ -221,18 +228,6 @@ public class UltraVNCFS implements RFBFS {
 		Object val = received;
 		received = null;
 		return val;
-	}
-
-	private void waitForMessage(int messageType, int contentParam,
-			RFBFileSystemMessage onReceipt) {
-		if (waitingOn != -1) {
-			throw new IllegalStateException(
-					"Cannot be waiting on more than one message. Already waiting on "
-							+ waitingOn);
-		}
-		received = null;
-		waitingOn = messageType;
-		this.onReceipt = onReceipt;
 	}
 
 	private void readDirectory(int contentParam) throws IOException {
@@ -328,6 +323,7 @@ public class UltraVNCFS implements RFBFS {
 		Object run(int contentParam) throws IOException;
 	}
 
+	@Override
 	public InputStream receive(String processPath, long filePointer)
 			throws IOException {
 		throw new UnsupportedOperationException();

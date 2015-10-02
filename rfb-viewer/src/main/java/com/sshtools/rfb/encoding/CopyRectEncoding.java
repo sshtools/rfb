@@ -10,15 +10,18 @@ public class CopyRectEncoding implements RFBEncoding {
     public CopyRectEncoding() {
     }
 
-    public boolean isPseudoEncoding() {
+    @Override
+	public boolean isPseudoEncoding() {
         return false;
     }
 
-    public int getType() {
+    @Override
+	public int getType() {
         return 1;
     }
 
-    public void processEncodedRect(RFBDisplay display, int x, int y, int width, int height, int encodingType) throws IOException {
+    @Override
+	public void processEncodedRect(RFBDisplay display, int x, int y, int width, int height, int encodingType) throws IOException {
 
         // Get the position of the area
         int posx = display.getEngine().getInputStream().readUnsignedShort();
@@ -36,7 +39,8 @@ public class CopyRectEncoding implements RFBEncoding {
      * 
      * @see com.sshtools.rfb.RFBEncoding#getName()
      */
-    public String getName() {
+    @Override
+	public String getName() {
         return "CopyRect";
     }
 

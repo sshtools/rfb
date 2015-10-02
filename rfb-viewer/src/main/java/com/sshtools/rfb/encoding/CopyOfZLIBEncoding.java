@@ -19,14 +19,17 @@ public class CopyOfZLIBEncoding extends AbstractRawEncoding {
 	public CopyOfZLIBEncoding() {
 	}
 
+	@Override
 	public int getType() {
 		return RFBConstants.ENC_ZLIB;
 	}
 
+	@Override
 	public boolean isPseudoEncoding() {
 		return false;
 	}
 
+	@Override
 	public void processEncodedRect(RFBDisplay display, int x, int y, int width,
 			int height, int encodingType) throws IOException {
 		ProtocolEngine engine = display.getEngine();
@@ -54,6 +57,7 @@ public class CopyOfZLIBEncoding extends AbstractRawEncoding {
 		}
 	}
 
+	@Override
 	public String getName() {
 		return "ZLIB";
 	}

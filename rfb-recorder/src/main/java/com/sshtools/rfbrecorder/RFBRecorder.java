@@ -5,8 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import com.sshtools.profile.AuthenticationException;
 import com.sshtools.rfb.DummyDisplay;
+import com.sshtools.rfb.RFBAuthenticationException;
 import com.sshtools.rfb.RFBContext;
 import com.sshtools.rfb.RFBDisplay;
 import com.sshtools.rfb.RFBEncoding;
@@ -26,7 +26,7 @@ public class RFBRecorder implements RFBEventHandler {
 		display = new DummyDisplay(context);
 	}
 
-	public void start() throws IOException, AuthenticationException {
+	public void start() throws IOException, RFBAuthenticationException {
 		System.out.println("Initialising session");
 		display.initialiseSession(transport, context, this);
 		System.out.println("Starting protocol");

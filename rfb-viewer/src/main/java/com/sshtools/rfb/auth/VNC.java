@@ -4,21 +4,22 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.util.List;
 
-import com.sshtools.profile.AuthenticationException;
 import com.sshtools.rfb.ProtocolEngine;
+import com.sshtools.rfb.RFBAuthenticationException;
 import com.sshtools.rfb.SecurityType;
 import com.sshtools.rfbcommon.AcmeDesCipher;
 import com.sshtools.rfbcommon.RFBConstants;
 
 public class VNC implements SecurityType {
 
+	@Override
 	public int process(ProtocolEngine engine) throws IOException,
-			AuthenticationException {
+			RFBAuthenticationException {
 		byte[] challenge = new byte[16];
 		try {
 			engine.getInputStream().readFully(challenge);
 		} catch (EOFException eof) {
-			throw new AuthenticationException("Incorrect password.");
+			throw new RFBAuthenticationException("Incorrect password.");
 		}
 
 		char[] initialPassword = engine.getInitialPassword();
@@ -27,12 +28,12 @@ public class VNC implements SecurityType {
 			String pwString = engine.getPrompt()
 					.passwordAuthenticationRequired();
 			if (pwString == null) {
-				throw new AuthenticationException("Authentication cancelled.");
+				throw new RFBAuthenticationException("Authentication cancelled.");
 			}
 			initialPassword = pwString == null ? null : pwString.toCharArray();
 		}
 		if (initialPassword == null || initialPassword.length == 0) {
-			throw new AuthenticationException("Password required.");
+			throw new RFBAuthenticationException("Password required.");
 		}
 		String pw = new String(initialPassword);
 		if (pw.length() > 8) {
@@ -53,19 +54,23 @@ public class VNC implements SecurityType {
 		return 1;
 	}
 
+	@Override
 	public void postServerInitialisation(ProtocolEngine engine)
 			throws IOException {
 	}
 
+	@Override
 	public int getType() {
 		return RFBConstants.SCHEME_VNC_AUTHENTICATION;
 	}
 
+	@Override
 	public String toString() {
 		return "VNC";
 	}
 
-    public List<Integer> getSubAuthTypes() {
+    @Override
+	public List<Integer> getSubAuthTypes() {
         return null;
     }
 

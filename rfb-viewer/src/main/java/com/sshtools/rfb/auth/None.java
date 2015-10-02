@@ -3,18 +3,20 @@ package com.sshtools.rfb.auth;
 import java.io.IOException;
 import java.util.List;
 
-import com.sshtools.profile.AuthenticationException;
 import com.sshtools.rfb.ProtocolEngine;
+import com.sshtools.rfb.RFBAuthenticationException;
 import com.sshtools.rfb.SecurityType;
 import com.sshtools.rfbcommon.RFBConstants;
 
 public class None implements SecurityType {
 
-	public int process(ProtocolEngine engine) throws AuthenticationException,
+	@Override
+	public int process(ProtocolEngine engine) throws RFBAuthenticationException,
 			IOException {
 		return 1;
 	}
 
+	@Override
 	public int getType() {
 		return RFBConstants.SCHEME_NO_AUTHENTICATION;
 	}
@@ -24,11 +26,13 @@ public class None implements SecurityType {
 		return "None";
 	}
 
+	@Override
 	public void postServerInitialisation(ProtocolEngine engine)
 			throws IOException {
 	}
 
-    public List<Integer> getSubAuthTypes() {
+    @Override
+	public List<Integer> getSubAuthTypes() {
         return null;
     }
 

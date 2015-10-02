@@ -15,14 +15,17 @@ public class RREEncoding implements RFBEncoding {
 	public RREEncoding() {
 	}
 
+	@Override
 	public int getType() {
 		return 2;
 	}
 
+	@Override
 	public boolean isPseudoEncoding() {
 		return false;
 	}
 
+	@Override
 	public void processEncodedRect(RFBDisplay display, int x, int y, int width,
 			int height, int encodingType) throws IOException {
 		ProtocolEngine engine = display.getEngine();
@@ -72,6 +75,7 @@ public class RREEncoding implements RFBEncoding {
 	 * 
 	 * @see com.sshtools.rfb.RFBEncoding#getName()
 	 */
+	@Override
 	public String getName() {
 		return "RRE";
 	}

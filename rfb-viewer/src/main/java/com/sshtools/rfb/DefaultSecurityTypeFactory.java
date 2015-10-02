@@ -20,6 +20,7 @@ public class DefaultSecurityTypeFactory implements SecurityTypeFactory {
 			RFBConstants.SCHEME_TLS_AUTHENTICATION
 			);
 
+	@Override
 	public SecurityType getSecurityType(int type) {
 	    if(!isAvailable(type)) {
 	        throw new IllegalArgumentException("Not available.");
@@ -39,6 +40,7 @@ public class DefaultSecurityTypeFactory implements SecurityTypeFactory {
 		}
 	}
 
+	@Override
 	public int selectScheme(List<Integer> supportedServerTypes)
 			throws IOException {
 		int authScheme;
@@ -62,10 +64,12 @@ public class DefaultSecurityTypeFactory implements SecurityTypeFactory {
 		return authScheme;
 	}
 
+	@Override
 	public boolean isAvailable(int type) {
 		return availableTypes.contains(type);
 	}
 
+	@Override
 	public List<Integer> getSecurityTypes() {
 		return availableTypes;
 	}

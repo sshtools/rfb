@@ -26,14 +26,17 @@ public class HextileEncoding extends AbstractRawEncoding {
 	public HextileEncoding() {
 	}
 
+	@Override
 	public int getType() {
 		return 5;
 	}
 
+	@Override
 	public boolean isPseudoEncoding() {
 		return false;
 	}
 
+	@Override
 	public void processEncodedRect(RFBDisplay display, int x, int y, int width, int height, int encodingType) throws IOException {
 		ProtocolEngine engine = display.getEngine();
 		RFBDisplayModel model = display.getDisplayModel();
@@ -132,6 +135,7 @@ public class HextileEncoding extends AbstractRawEncoding {
 	 * 
 	 * @see com.sshtools.rfb.RFBEncoding#getName()
 	 */
+	@Override
 	public String getName() {
 		return "Hextile";
 	}

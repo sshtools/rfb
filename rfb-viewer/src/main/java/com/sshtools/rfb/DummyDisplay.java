@@ -12,7 +12,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageProducer;
 
-import com.sshtools.ui.swing.ResourceIcon;
+import javax.swing.ImageIcon;
 
 public class DummyDisplay implements RFBDisplay {
 
@@ -32,26 +32,32 @@ public class DummyDisplay implements RFBDisplay {
 		return Toolkit.getDefaultToolkit().createImage(src);
 	}
 
+	@Override
 	public RFBContext getContext() {
 		return context;
 	}
 
+	@Override
 	public Component getDisplayComponent() {
 		return null;
 	}
 
+	@Override
 	public RFBDisplayModel getDisplayModel() {
 		return displayModel;
 	}
 
+	@Override
 	public ProtocolEngine getEngine() {
 		return engine;
 	}
 
+	@Override
 	public boolean handleKeyEvent(KeyEvent evt) {
 		return false;
 	}
 
+	@Override
 	public void initialiseSession(RFBTransport transport,
 			RFBContext context, RFBEventHandler prompt) {
 		context.resetEncodings();
@@ -60,35 +66,31 @@ public class DummyDisplay implements RFBDisplay {
 		engine = new ProtocolEngine(this, transport, context, prompt,
 			displayModel,
 
-			new ResourceIcon(this.getClass(), "/images/empty-cursor.png")
-				.getImage(), new ResourceIcon(this.getClass(),
-				"/images/dot-cursor.png").getImage());
-		engine.setStopCursor(new ResourceIcon(this.getClass(),
-			"/images/stop-cursor.png").getImage());
+			new ImageIcon(this.getClass().getResource("/images/empty-cursor.png"))
+				.getImage(), new ImageIcon(this.getClass().getResource("/images/dot-cursor.png")).getImage());
+		engine.setStopCursor(new ImageIcon(this.getClass().getResource("/images/stop-cursor.png")).getImage());
 		
 	}
 
+	@Override
 	public void requestRepaint(int tm, int x, int y, int w, int h) {
-		// TODO Auto-generated method stub
-		
 	}
 
+	@Override
 	public void resizeComponent() {
-		// TODO Auto-generated method stub
-		
 	}
 
+	@Override
 	public void setUpdateRect(Rectangle updateRect) {
-		// TODO Auto-generated method stub
-		
 	}
 
+	@Override
 	public boolean imageUpdate(Image img, int infoflags, int x, int y,
 			int width, int height) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
+	@Override
 	public void setCursor(Cursor defaultCursor) {
 	}
 	

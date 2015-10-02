@@ -11,7 +11,7 @@ import java.io.IOException;
 import javax.swing.JFrame;
 import javax.swing.JSlider;
 
-import com.sshtools.profile.AuthenticationException;
+import com.sshtools.rfb.RFBAuthenticationException;
 import com.sshtools.rfb.RFBContext;
 import com.sshtools.rfb.RFBEncoding;
 import com.sshtools.rfb.RFBEventHandler;
@@ -33,7 +33,7 @@ public class RFBPlayer extends JFrame implements RFBEventHandler {
 		setVisible(true);
 	}
 
-	public void open(File file) throws IOException, AuthenticationException {
+	public void open(File file) throws IOException, RFBAuthenticationException {
 		slider.setMaximum((int) (file.length() / 1024));
 		RecordedTransport tr = new RecordedTransport(file);
 		RFBContext ctx = tr.getContext();

@@ -14,14 +14,17 @@ public class CORREEncoding extends AbstractRawEncoding {
 	public CORREEncoding() {
 	}
 
+	@Override
 	public int getType() {
 		return 4;
 	}
 
+	@Override
 	public boolean isPseudoEncoding() {
 		return false;
 	}
 
+	@Override
 	public void processEncodedRect(RFBDisplay display, int x, int y, int width, int height, int encodingType) throws IOException {
 
 		ProtocolEngine engine = display.getEngine();
@@ -59,6 +62,7 @@ public class CORREEncoding extends AbstractRawEncoding {
 
 	}
 
+	@Override
 	public String getName() {
 		return "CORRE";
 	}

@@ -13,13 +13,12 @@ import javax.swing.JFrame;
 
 import org.apache.log4j.BasicConfigurator;
 
-import com.sshtools.profile.AuthenticationException;
+import com.sshtools.rfb.RFBAuthenticationException;
 import com.sshtools.rfb.RFBContext;
 import com.sshtools.rfb.RFBEncoding;
 import com.sshtools.rfb.RFBEventHandler;
 import com.sshtools.rfb.RFBTransport;
 import com.sshtools.rfb.swing.SwingRFBDisplay;
-import com.sshtools.rfbcommon.RFBConstants;
 
 @SuppressWarnings("serial")
 public class Test extends JFrame implements RFBEventHandler {
@@ -38,22 +37,27 @@ public class Test extends JFrame implements RFBEventHandler {
 //		context.setPreferredEncoding(RFBConstants.ENC_ZRLE);
 		transport = new RFBTransport() {
 
+			@Override
 			public int getPort() {
 				return socket.getLocalPort();
 			}
 
+			@Override
 			public OutputStream getOutputStream() throws IOException {
 				return socket.getOutputStream();
 			}
 
+			@Override
 			public InputStream getInputStream() throws IOException {
 				return socket.getInputStream();
 			}
 
+			@Override
 			public String getHostname() {
 				return socket.getLocalAddress().getHostAddress();
 			}
 
+			@Override
 			public void close() throws IOException {
 				socket.close();
 			}
@@ -68,30 +72,35 @@ public class Test extends JFrame implements RFBEventHandler {
 		setSize(800, 600);
 	}
 
-	public void connect() throws IOException, AuthenticationException {
+	public void connect() throws IOException, RFBAuthenticationException {
 		System.out.println("Connecting to desktop");
 		display.getEngine().startRFBProtocol();
 	}
 
+	@Override
 	public String passwordAuthenticationRequired() {
 		System.out.println("Password authentication requested");
 		return "flipper";
 	}
 
+	@Override
 	public void connected() {
 		System.out.println("Connected to desktop");
 	}
 
+	@Override
 	public void disconnected() {
 		System.out.println("Disconnected from desktop");
 	}
 
+	@Override
 	public void resized(int width, int height) {
 		System.out.println("Desktop resized to " + width + " x " + height);
 		display.setPreferredSize(new Dimension(width, height));
 		pack();
 	}
 
+	@Override
 	public void encodingChanged(RFBEncoding currentEncoding) {
 	}
 

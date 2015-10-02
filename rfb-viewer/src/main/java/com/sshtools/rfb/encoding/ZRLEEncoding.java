@@ -2,7 +2,6 @@ package com.sshtools.rfb.encoding;
 
 import com.sshtools.rfb.RFBDisplay;
 import com.sshtools.rfb.RawBuffer;
-import com.sshtools.rfbcommon.ImageUtil;
 import com.sshtools.rfbcommon.RFBConstants;
 
 public class ZRLEEncoding extends ZLIBEncoding {
@@ -10,10 +9,12 @@ public class ZRLEEncoding extends ZLIBEncoding {
 
 	private RawBuffer rawBuffer;
 
+	@Override
 	public int getType() {
 		return RFBConstants.ENC_ZRLE;
 	}
 
+	@Override
 	public boolean isPseudoEncoding() {
 		return false;
 	}
