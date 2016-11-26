@@ -12,7 +12,7 @@ See the vncserver module for a concrete server implementation that has some nati
 	<parent>
 		<groupId>com.sshtools</groupId>
 		<artifactId>rfb</artifactId>
-		<version>2.1.2-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
