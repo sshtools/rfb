@@ -1,0 +1,1 @@
+"c:\program files\java\jdk1.7.0_67\bin\javah.exe" -d src/main/native -classpath target\classes com.sshtools.rfbserver.windows.jni.DisplayHook

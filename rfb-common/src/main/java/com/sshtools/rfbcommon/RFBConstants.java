@@ -4,6 +4,42 @@ import java.util.Arrays;
 import java.util.List;
 
 public interface RFBConstants {
+	
+	// Keysysm
+	public final static int RFBKEY_BACKSPACE = 0xff08;
+	public final static int RFBKEY_TAB = 0xff09;
+	public final static int RFBKEY_ENTER = 0xff0d;
+	public final static int RFBKEY_ESCAPE = 0xff1b;
+	public final static int RFBKEY_INSERT= 0xff63;
+	public final static int RFBKEY_DELETE = 0xffff;
+	public final static int RFBKEY_HOME = 0xff50;
+	public final static int RFBKEY_END = 0xff57;
+	public final static int RFBKEY_PGUP = 0xff55;
+	public final static int RFBKEY_PGDN = 0xff56;
+	public final static int RFBKEY_LEFT= 0xff51;
+	public final static int RFBKEY_UP= 0xff52;
+	public final static int RFBKEY_RIGHT= 0xff53;
+	public final static int RFBKEY_DOWN = 0xff54;
+	public final static int RFBKEY_F1 = 0xffbe;
+	public final static int RFBKEY_F2 = 0xffbf;
+	public final static int RFBKEY_F3 = 0xffc0;
+	public final static int RFBKEY_F4 = 0xffc1;
+	public final static int RFBKEY_F5 = 0xffc2;
+	public final static int RFBKEY_F6 = 0xffc3;
+	public final static int RFBKEY_F7 = 0xffc4;
+	public final static int RFBKEY_F8 = 0xffc5;
+	public final static int RFBKEY_F9 = 0xffc6;
+	public final static int RFBKEY_F10 = 0xffc7;
+	public final static int RFBKEY_F11 = 0xffc8;
+	public final static int RFBKEY_F12 = 0xffc9;
+	public final static int RFBKEY_SHIFT_LEFT = 0xffe1;
+	public final static int RFBKEY_SHIFT_RIGHT = 0xffe2;
+	public final static int RFBKEY_CTRL_LEFT = 0xffe3;
+	public final static int RFBKEY_CTRL_RIGHT = 0xffe4;
+	public final static int RFBKEY_META_LEFT = 0xffe5;
+	public final static int RFBKEY_META_RIGHT = 0xffe6;
+	public final static int RFBKEY_ALT_LEFT = 0xffe7;
+	public final static int RFBKEY_ALT_RIGHT = 0xffe8;
 
 	// Client messages
 	public final static int CMSG_SET_PIXEL_FORMAT = 0;
