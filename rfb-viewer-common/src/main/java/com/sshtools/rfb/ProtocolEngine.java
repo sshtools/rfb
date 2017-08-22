@@ -19,6 +19,7 @@ import com.sshtools.rfbcommon.ProtocolReader;
 import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbcommon.RFBConstants;
 import com.sshtools.rfbcommon.RFBVersion;
+import com.sshtools.rfbcommon.ScreenData;
 
 public class ProtocolEngine implements Runnable {
 	final static Logger LOG = LoggerFactory.getLogger(ProtocolEngine.class);
@@ -507,7 +508,7 @@ public class ProtocolEngine implements Runnable {
 										|| rect.getEncoding() == RFBContext.MASK_ENCODING_NEW_SIZE)
 									break;
 							} else {
-								System.out.println("WARNING: Unknown encoding " + rect.getEncoding());
+								LOG.warn(String.format("Unknown encoding %s", rect.getEncoding()));
 							}
 						} catch (IOException ex) {
 							ex.printStackTrace();
@@ -849,6 +850,10 @@ public class ProtocolEngine implements Runnable {
 		synchronized (out) {
 			out.write(msg);
 		}
+	}
+	
+	public void sendExtendedScreenData(ScreenData screenData) {
+		
 	}
 
 	public void sendPointerEvent(int modifiers, int x, int y) throws IOException {

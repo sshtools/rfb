@@ -17,7 +17,7 @@ import com.sshtools.rfbcommon.TightCapability;
 import com.sshtools.rfbserver.UpdateRectangle;
 
 public class ZRLEEncoding extends AbstractZLIBEncoding {
-    final static Logger LOG = LoggerFactory.getLogger(HextileEncoding.class);
+    final static Logger LOG = LoggerFactory.getLogger(ZRLEEncoding.class);
 
     private final static int[] bitsPerPackedPixel = { 0, 1, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
 

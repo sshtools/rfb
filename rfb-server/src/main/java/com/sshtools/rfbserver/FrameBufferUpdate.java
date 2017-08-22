@@ -1,6 +1,5 @@
 package com.sshtools.rfbserver;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sshtools.rfbcommon.PixelFormat;
+import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbcommon.RFBConstants;
 import com.sshtools.rfbserver.encodings.RFBServerEncoding;
 import com.sshtools.rfbserver.protocol.RFBEncoder;
@@ -27,7 +27,7 @@ public class FrameBufferUpdate extends Reply<List<UpdateRectangle<?>>> {
     }
 
     @Override
-    public void write(DataOutputStream dout) throws IOException {
+    public void write(ProtocolWriter dout) throws IOException {
 
         dout.write(0); // areas
         dout.writeShort(data.size());

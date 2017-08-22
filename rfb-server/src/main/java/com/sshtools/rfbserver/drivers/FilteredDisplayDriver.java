@@ -4,14 +4,10 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
+import com.sshtools.rfbcommon.ScreenData;
 import com.sshtools.rfbserver.DisplayDriver;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
-import com.sshtools.rfbserver.DisplayDriver.DamageListener;
-import com.sshtools.rfbserver.DisplayDriver.PointerListener;
-import com.sshtools.rfbserver.DisplayDriver.PointerShape;
-import com.sshtools.rfbserver.DisplayDriver.ScreenBoundsListener;
-import com.sshtools.rfbserver.DisplayDriver.WindowListener;
 
 public class FilteredDisplayDriver extends AbstractDisplayDriver {
 
@@ -31,12 +27,12 @@ public class FilteredDisplayDriver extends AbstractDisplayDriver {
 	public void init() throws Exception {
 		updateListener = new UpdateListener() {
 			public void update(UpdateRectangle<?> update) {
-				filteredUpdate(update);				
+				filteredUpdate(update);
 			}
 		};
 		screenBoundsListener = new ScreenBoundsListener() {
-			public void resized(Rectangle newBounds) {
-				filteredScreenBoundsChanged(newBounds);
+			public void resized(Rectangle newBounds, boolean clientInitiated) {
+				filteredScreenBoundsChanged(newBounds, clientInitiated);
 			}
 		};
 		windowListener = new WindowListener() {
@@ -110,8 +106,13 @@ public class FilteredDisplayDriver extends AbstractDisplayDriver {
 		fireWindowMoved(name, rectangle, oldRectangle);
 	}
 
-	protected void filteredScreenBoundsChanged(Rectangle rectangle) {
-		fireScreenBoundsChanged(rectangle);
+	protected void filteredScreenBoundsChanged(Rectangle rectangle, boolean clientInitiated) {
+		fireScreenBoundsChanged(rectangle, clientInitiated);
+	}
+
+	@Override
+	public void resize(ScreenData screen) {
+		underlyingDriver.resize(screen);
 	}
 
 	protected void filteredUpdate(UpdateRectangle<?> update) {
@@ -160,9 +161,9 @@ public class FilteredDisplayDriver extends AbstractDisplayDriver {
 	public Point getPointerPosition() {
 		return underlyingDriver.getPointerPosition();
 	}
-	
+
 	public String toString() {
-		return getClass().getSimpleName() + "[" + underlyingDriver + "]"; 
+		return getClass().getSimpleName() + "[" + underlyingDriver + "]";
 	}
 
 }

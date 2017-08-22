@@ -2,8 +2,9 @@ package com.sshtools.rfbserver.protocol;
 
 import java.awt.Point;
 import java.awt.image.BufferedImage;
-import java.io.DataOutputStream;
 import java.io.IOException;
+
+import com.sshtools.rfbcommon.ProtocolWriter;
 
 public abstract class Reply<T> {
 
@@ -46,6 +47,6 @@ public abstract class Reply<T> {
         return "Reply [data=" + data + ", code=" + code + "]";
     }
 
-    public abstract void write(DataOutputStream dout) throws IOException;
+    public abstract void write(ProtocolWriter dout) throws IOException;
 
 }

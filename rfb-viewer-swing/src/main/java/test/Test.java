@@ -12,6 +12,8 @@ import java.net.Socket;
 import javax.swing.JFrame;
 
 import org.apache.log4j.BasicConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sshtools.rfb.RFBAuthenticationException;
 import com.sshtools.rfb.RFBContext;
@@ -20,24 +22,23 @@ import com.sshtools.rfb.RFBEventHandler;
 import com.sshtools.rfb.RFBTransport;
 import com.sshtools.rfb.swing.SwingRFBDisplay;
 import com.sshtools.rfb.swing.SwingRFBToolkit;
+import com.sshtools.rfbcommon.RFBConstants;
 
 @SuppressWarnings("serial")
 public class Test extends JFrame implements RFBEventHandler {
-
+	final static Logger LOG = LoggerFactory.getLogger(Test.class);
 	private SwingRFBDisplay display;
 	private RFBContext context;
 	private RFBTransport transport;
 
 	public Test(final Socket socket) {
 		super("Remote Desktop");
-
 		context = new RFBContext();
-//		context.setUseCopyRect(false);
+		// context.setUseCopyRect(false);
 		context.setJpegQuality(0);
-//		context.setPixelFormat(RFBContext.PIXEL_FORMAT_8_BIT);
-//		context.setPreferredEncoding(RFBConstants.ENC_ZRLE);
+		// context.setPixelFormat(RFBContext.PIXEL_FORMAT_8_BIT);
+		 context.setPreferredEncoding(RFBConstants.ENC_TIGHT_PNG);
 		transport = new RFBTransport() {
-
 			@Override
 			public int getPort() {
 				return socket.getLocalPort();
@@ -63,40 +64,37 @@ public class Test extends JFrame implements RFBEventHandler {
 				socket.close();
 			}
 		};
-
-
 		display = new SwingRFBDisplay();
 		display.initialiseSession(transport, context, this);
-
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(display, BorderLayout.CENTER);
 		setSize(800, 600);
 	}
 
 	public void connect() throws IOException, RFBAuthenticationException {
-		System.out.println("Connecting to desktop");
+		LOG.info("Connecting to desktop");
 		display.getEngine().startRFBProtocol();
 	}
 
 	@Override
 	public String passwordAuthenticationRequired() {
-		System.out.println("Password authentication requested");
+		LOG.info("Password authentication requested");
 		return "flipper";
 	}
 
 	@Override
 	public void connected() {
-		System.out.println("Connected to desktop");
+		LOG.info("Connected to desktop");
 	}
 
 	@Override
 	public void disconnected() {
-		System.out.println("Disconnected from desktop");
+		LOG.info("Disconnected from desktop");
 	}
 
 	@Override
 	public void resized(int width, int height) {
-		System.out.println("Desktop resized to " + width + " x " + height);
+		LOG.info(String.format("Desktop resized to %d x %d", width, height));
 		display.setPreferredSize(new Dimension(width, height));
 		pack();
 	}
@@ -108,12 +106,7 @@ public class Test extends JFrame implements RFBEventHandler {
 	public static void main(String[] args) throws Exception {
 		BasicConfigurator.configure();
 		new SwingRFBToolkit();
-		Socket s = new Socket("localhost", 5900);
-//		Socket s = new Socket("smallblue", 5900);
-//		Socket s = new Socket("192.168.91.145", 5900);
-//		Socket s = new Socket("192.168.91.141", 5900);
-//		Socket s = new Socket("192.168.91.139", 5900);
-//		Socket s = new Socket("192.168.91.142", 5900);
+		Socket s = new Socket(args[0], 5900);
 		Test ad = new Test(s);
 		ad.addWindowListener(new WindowAdapter() {
 			@Override

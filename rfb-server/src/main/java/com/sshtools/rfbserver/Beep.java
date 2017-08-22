@@ -1,8 +1,8 @@
 package com.sshtools.rfbserver;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbcommon.RFBConstants;
 import com.sshtools.rfbserver.protocol.Reply;
 
@@ -13,7 +13,7 @@ public class Beep extends Reply<Void> {
     }
 
     @Override
-    public void write(DataOutputStream dout) throws IOException {
+    public void write(ProtocolWriter dout) throws IOException {
     }
 
 }

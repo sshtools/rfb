@@ -3,12 +3,9 @@ package com.sshtools.rfbserver.files.uvnc;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.sshtools.rfbcommon.RFBConstants;
 import com.sshtools.rfbcommon.RFBFile;
-import com.sshtools.rfbserver.protocol.Reply;
 
 public class ListDirectoryReply extends FileTransfer<RFBFile> {
 

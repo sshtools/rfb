@@ -5,11 +5,13 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 import com.sshtools.rfb.ProtocolEngine;
 import com.sshtools.rfb.RFBFS;
@@ -20,9 +22,8 @@ import com.sshtools.rfbcommon.RFBFile;
 public class UltraVNCFS implements RFBFS {
 	private static final int RFB_MAX_PATH = 255;
 	private ProtocolEngine protocolEngine;
-	private int waitingOn = -1;
 	private Object wait = new Object();
-	private Object received = null;
+	private Semaphore sem = new Semaphore(1);
 	private boolean readingDirectory;
 	private String cachedPath;
 	// Requests
@@ -38,8 +39,10 @@ public class UltraVNCFS implements RFBFS {
 	private final static int RFB_DIR_PACKET = 2;
 	private final static int RFB_RECV_DIRECTORY = 1;
 	private final static int RFB_RECV_DRIVE_LIST = 3;
-	private List files = new ArrayList();
-	private Map fileMap = new HashMap();
+	
+	private List<RFBFile> files = new ArrayList<RFBFile>();
+	private Map<String, RFBFile> fileMap = new HashMap<String, RFBFile>();
+	private Object received;
 
 	public UltraVNCFS(ProtocolEngine protocolEngine) {
 		this.protocolEngine = protocolEngine;
@@ -47,21 +50,39 @@ public class UltraVNCFS implements RFBFS {
 
 	@Override
 	public boolean isActive() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
-	public synchronized boolean mkdir(String filename) throws IOException {
-		writeDirRequest(RFB_COMMAND, RFB_DIR_CREATE, filename);
-		return ((Boolean) waitTillReceived()).booleanValue();
+	public boolean mkdir(String filename) throws IOException {
+		try {
+			sem.acquire();
+			writeDirRequest(RFB_COMMAND, RFB_DIR_CREATE, filename);
+			sem.acquire();
+			sem.release();
+			return ((Boolean) received).booleanValue();
+		} catch (InterruptedException ie) {
+			InterruptedIOException interruptedIOException = new InterruptedIOException(
+					"Interuppted waiting for reply.");
+			interruptedIOException.initCause(ie);
+			throw interruptedIOException;
+		}
 	}
 
 	@Override
 	public synchronized RFBFile[] list(String filename) throws IOException {
-		writeDirRequest(RFB_DIR_CONTENT_REQUEST, RFB_DIR_CONTENT,
-				addTrailingSlash(filename));
-		return (RFBFile[]) waitTillReceived();
+		try {
+			sem.acquire();
+			writeDirRequest(RFB_DIR_CONTENT_REQUEST, RFB_DIR_CONTENT, addTrailingSlash(filename));
+			sem.acquire();
+			sem.release();
+			return (RFBFile[]) received;
+		} catch (InterruptedException ie) {
+			InterruptedIOException interruptedIOException = new InterruptedIOException(
+					"Interuppted waiting for reply.");
+			interruptedIOException.initCause(ie);
+			throw interruptedIOException;
+		}
 	}
 
 	private String addTrailingSlash(String filename) {
@@ -85,9 +106,9 @@ public class UltraVNCFS implements RFBFS {
 			String basename = filename.substring(lidx + 1);
 			// If the last path read was this path, then get the file from
 			// the cache, otherwise read it
-			if (!cachedPath.equals(parentPath)
-					|| !fileMap.containsKey(basename)) {
-				list(parentPath);
+			if (!parentPath.equals(cachedPath) || !fileMap.containsKey(basename)) {
+				for(RFBFile f : list(parentPath)) 
+					fileMap.put(f.getName(), f);
 			}
 			return (RFBFile) fileMap.get(basename);
 		}
@@ -98,16 +119,14 @@ public class UltraVNCFS implements RFBFS {
 	// return (RFBDrive[]) waitTillReceived();
 	// }
 
-	public static final void writeInt(OutputStream out, int v)
-			throws IOException {
+	public static final void writeInt(OutputStream out, int v) throws IOException {
 		out.write((v & 0xFF000000) >>> 24);
 		out.write((v & 0xFF0000) >>> 16);
 		out.write((v & 0xFF00) >>> 8);
 		out.write((v & 0xFF) >>> 0);
 	}
 
-	private String[] readTerminatedString(DataInputStream din)
-			throws IOException {
+	private String[] readTerminatedString(DataInputStream din) throws IOException {
 		int length = din.readInt();
 		byte[] arr = new byte[length];
 		din.readFully(arr);
@@ -129,8 +148,7 @@ public class UltraVNCFS implements RFBFS {
 		return (String[]) strings.toArray(new String[strings.size()]);
 	}
 
-	private void writeDirRequest(int request, int param, String filename)
-			throws IOException {
+	private void writeDirRequest(int request, int param, String filename) throws IOException {
 		DataOutputStream out = protocolEngine.getOutputStream();
 		synchronized (out) {
 			out.writeByte(RFBConstants.SMSG_FILE_TRANSFER);
@@ -179,10 +197,9 @@ public class UltraVNCFS implements RFBFS {
 		if (type == RFB_DIR_DRIVE_LIST || type == RFB_DIR_PACKET) {
 			readDirectory(contentParam);
 		} else {
-			throw new IOException(
-					"Was expecting a different file system result");
+			throw new IOException("Was expecting a different file system result");
 		}
-		return false;
+		return true;
 	}
 
 	@Override
@@ -211,23 +228,7 @@ public class UltraVNCFS implements RFBFS {
 
 	private void received(Object value) {
 		received = value;
-		synchronized (wait) {
-			wait.notifyAll();
-		}
-	}
-
-	private Object waitTillReceived() {
-		try {
-			synchronized (wait) {
-				while (received == null) {
-					wait.wait();
-				}
-			}
-		} catch (InterruptedException e) {
-		}
-		Object val = received;
-		received = null;
-		return val;
+		sem.release();
 	}
 
 	private void readDirectory(int contentParam) throws IOException {
@@ -247,8 +248,7 @@ public class UltraVNCFS implements RFBFS {
 			readingDirectory = false;
 			break;
 		default:
-			throw new IllegalArgumentException(
-					"Invalid operation for directory listing");
+			throw new IllegalArgumentException("Invalid operation for directory listing");
 		}
 	}
 
@@ -285,8 +285,8 @@ public class UltraVNCFS implements RFBFS {
 		if ((fileAttributes & 0x10000000) == 0x10000000) {
 			folder = true;
 		}
-		RFBFile file = new DefaultRFBFile(folder, fileSizeHigh, fileName,
-				fileAttributes, creationTime, lastAccessTime, lastWriteTime);
+		RFBFile file = new DefaultRFBFile(folder, fileSizeHigh, fileName, fileAttributes, creationTime, lastAccessTime,
+				lastWriteTime);
 		files.add(file);
 		fileMap.put(fileName, file);
 	}
@@ -324,8 +324,7 @@ public class UltraVNCFS implements RFBFS {
 	}
 
 	@Override
-	public InputStream receive(String processPath, long filePointer)
-			throws IOException {
+	public InputStream receive(String processPath, long filePointer) throws IOException {
 		throw new UnsupportedOperationException();
 	}
 }

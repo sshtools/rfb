@@ -1,9 +1,9 @@
 package com.sshtools.rfbserver.encodings;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.sshtools.rfbcommon.PixelFormat;
+import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbcommon.RFBConstants;
 import com.sshtools.rfbcommon.TightCapability;
 import com.sshtools.rfbserver.RFBClient;
@@ -22,7 +22,7 @@ public class RawEncoding extends AbstractRawEncoding {
         return false;
     }
 
-    public void encode(UpdateRectangle<?> update, DataOutputStream dout, PixelFormat pixelFormat, RFBClient client)
+    public void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
                     throws IOException {
         rawEncode(update, dout, pixelFormat);
     }

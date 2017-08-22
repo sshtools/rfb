@@ -10,9 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sshtools.rfbserver.DisplayDriver;
-import com.sshtools.rfbserver.DisplayDriver.DamageListener;
-import com.sshtools.rfbserver.DisplayDriver.PointerListener;
-import com.sshtools.rfbserver.DisplayDriver.PointerShape;
 import com.sshtools.rfbserver.RFBClient;
 
 /**
@@ -143,7 +140,7 @@ public class WindowedDisplayDriver extends FilteredDisplayDriver {
 	}
 
 	@Override
-	protected void filteredScreenBoundsChanged(Rectangle rectangle) {
+	protected void filteredScreenBoundsChanged(Rectangle rectangle, boolean clientInitiated) {
 		Rectangle actualBounds = getActualBounds();
 
 		// Shrink the viewport if the underlying driver now has a smaller screen
@@ -154,7 +151,7 @@ public class WindowedDisplayDriver extends FilteredDisplayDriver {
 			area.height = rectangle.height;
 		}
 
-		fireScreenBoundsChanged(makeRelativeToBounds(rectangle, actualBounds));
+		fireScreenBoundsChanged(makeRelativeToBounds(rectangle, actualBounds), clientInitiated);
 	}
 
 	public void mouseEvent(RFBClient client, int buttonMask, int x, int y) {

@@ -1,25 +1,17 @@
 package com.sshtools.rfb.swing;
 
-import java.awt.image.IndexColorModel;
 import java.io.ByteArrayInputStream;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.Map;
-import java.util.logging.Level;
 
 import com.sshtools.rfb.RFBToolkit;
 import com.sshtools.rfb.RFBToolkit.RFBImage.Type;
-import com.sshtools.rfbcommon.ImageUtil;
 import com.sshtools.rfbcommon.PixelFormat;
 
 import javafx.application.Platform;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
@@ -70,7 +62,6 @@ public class JavaFXRFBToolkit extends RFBToolkit implements RFBToolkit.RFBClipbo
 	@Override
 	public RFBImage ensureType(RFBImage bim, Type type) {
 		if (bim.getType() != type) {
-
 		}
 		return bim;
 	}
@@ -194,7 +185,6 @@ public class JavaFXRFBToolkit extends RFBToolkit implements RFBToolkit.RFBClipbo
 					pw.setColor(tx, ty, ((RFBJavaFXColor) color).nativeColor);
 				}
 			}
-
 			// switch (pr.getPixelFormat().getType()) {
 			// case BYTE_BGRA:
 			// case BYTE_BGRA_PRE:
@@ -226,7 +216,6 @@ public class JavaFXRFBToolkit extends RFBToolkit implements RFBToolkit.RFBClipbo
 			// default:
 			// throw new IllegalStateException("Unknown data type");
 			// }
-
 		}
 
 		@Override
@@ -255,7 +244,6 @@ public class JavaFXRFBToolkit extends RFBToolkit implements RFBToolkit.RFBClipbo
 			// g2d.setClip(null);
 			// else
 			// g2d.setClip(clip[0], clip[1], clip[2], clip[3]);
-
 			// TODO Does this matter? Only usages is in paintCursor and im not
 			// convinced it's actually needed. Test this before removing from
 			// interface
@@ -284,11 +272,9 @@ public class JavaFXRFBToolkit extends RFBToolkit implements RFBToolkit.RFBClipbo
 
 		RFBJavaFXImage(Image backing) {
 			this.backing = backing;
-
 			if (backing instanceof WritableImage) {
 				writer = ((WritableImage) backing).getPixelWriter();
 			}
-
 			reader = backing.getPixelReader();
 			ctx = new RFBGraphics2D(reader, writer, getType());
 		}
@@ -300,31 +286,29 @@ public class JavaFXRFBToolkit extends RFBToolkit implements RFBToolkit.RFBClipbo
 			reader = backing.getPixelReader();
 			ctx = new RFBGraphics2D(reader, writer, getType());
 		}
-		
-		public RFBJavaFXImage(PixelFormat fmt, int w, int h) {
 
-//			if (!pixelFormat.isTrueColor()) {
-//	            // TODO 16 bit indexed
-//	            if (LOG.isLoggable(Level.FINE)) {
-//	                LOG.fine("Creating Indexed 8 bit colour model");
-//	            }
-//	            Map<Integer, Integer> colors = pixelFormat.getColorMap();
-//	            byte[] r = new byte[colors.size()];
-//	            byte[] g = new byte[colors.size()];
-//	            byte[] b = new byte[colors.size()];
-//	            for (Map.Entry<Integer, Integer> en : colors.entrySet()) {
-//	                r[en.getKey()] = (byte) (en.getValue() >> 16);
-//	                g[en.getKey()] = (byte) (en.getValue() >> 8);
-//	                b[en.getKey()] = (byte) (en.getValue() & 0xff);
-//	            }
-//
-//				WritableImage img = new WritableImage(width, height);
-//				PixelWriter pw;
-//	            
-//	            
-//	            colorModel = new IndexColorModel(8, colors.size(), r, g, b);
-//	        }
-			
+		public RFBJavaFXImage(PixelFormat fmt, int w, int h) {
+			// if (!pixelFormat.isTrueColor()) {
+			// // TODO 16 bit indexed
+			// if (LOG.isLoggable(Level.FINE)) {
+			// LOG.fine("Creating Indexed 8 bit colour model");
+			// }
+			// Map<Integer, Integer> colors = pixelFormat.getColorMap();
+			// byte[] r = new byte[colors.size()];
+			// byte[] g = new byte[colors.size()];
+			// byte[] b = new byte[colors.size()];
+			// for (Map.Entry<Integer, Integer> en : colors.entrySet()) {
+			// r[en.getKey()] = (byte) (en.getValue() >> 16);
+			// g[en.getKey()] = (byte) (en.getValue() >> 8);
+			// b[en.getKey()] = (byte) (en.getValue() & 0xff);
+			// }
+			//
+			// WritableImage img = new WritableImage(width, height);
+			// PixelWriter pw;
+			//
+			//
+			// colorModel = new IndexColorModel(8, colors.size(), r, g, b);
+			// }
 			backing = new WritableImage(w, h);
 			writer = ((WritableImage) backing).getPixelWriter();
 			reader = backing.getPixelReader();
@@ -370,8 +354,7 @@ public class JavaFXRFBToolkit extends RFBToolkit implements RFBToolkit.RFBClipbo
 				byte[] buf = new byte[width * height];
 				backing.getPixelReader().getPixels(0, 0, width, height,
 						(WritablePixelFormat<ByteBuffer>) backing.getPixelReader().getPixelFormat(), buf, 0, width);
-				javafx.scene.image.PixelFormat<ByteBuffer> w = backing.getPixelReader().getPixelFormat()
-						.getByteRgbInstance();
+				javafx.scene.image.PixelFormat<ByteBuffer> w = backing.getPixelReader().getPixelFormat().getByteRgbInstance();
 				return buf;
 			case INT_ARGB:
 			case INT_ARGB_PRE:
@@ -382,7 +365,6 @@ public class JavaFXRFBToolkit extends RFBToolkit implements RFBToolkit.RFBClipbo
 			default:
 				throw new IllegalStateException("Unknown data type");
 			}
-
 		}
 
 		@Override
@@ -408,7 +390,5 @@ public class JavaFXRFBToolkit extends RFBToolkit implements RFBToolkit.RFBClipbo
 				return type;
 			}
 		}
-
 	}
-
 }

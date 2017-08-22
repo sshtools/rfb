@@ -27,16 +27,12 @@ import com.sshtools.rfb.RFBDisplayModel;
 import com.sshtools.rfbcommon.ImageUtil;
 import com.sshtools.rfbcommon.ProtocolReader;
 import com.sshtools.rfbcommon.RFBConstants;
+import com.sshtools.rfbcommon.TightConstants;
+import com.sshtools.rfbcommon.TightUtil;
 
-public class TightEncoding extends AbstractRawEncoding {
+public class TightEncoding extends AbstractRawEncoding implements TightConstants {
 	final static Logger LOG = LoggerFactory.getLogger(ProtocolEngine.class);
 
-	private final static int OP_FILL = 0x08;
-	private final static int OP_JPEG = 0x09;
-
-	private final static int OP_FILTER_RAW = 0x00;
-	private final static int OP_FILTER_PALETTE = 0x01;
-	private final static int OP_FILTER_GRADIENT = 0x02;
 
 	private final static int NO_OF_INFLATERS = 4;
 
@@ -70,12 +66,8 @@ public class TightEncoding extends AbstractRawEncoding {
 
 		input = display.getEngine().getInputStream();
 		rfbModel = display.getDisplayModel();
-		pixSize = (rfbModel.getColorDepth() == 24 && rfbModel.getBitsPerPixel() == 32) ? 3
-				: rfbModel.getBytesPerPixel();
-		tightNative = rfbModel.getBytesPerPixel() == 4 && pixSize == 3
-				&& rfbModel.getRedMax() == 0xff
-				&& rfbModel.getGreenMax() == 0xff
-				&& rfbModel.getBlueMax() == 0xff;
+		pixSize = TightUtil.getTightPixSize(rfbModel);
+		tightNative = TightUtil.isTightNative(rfbModel);
 		colorBuff = new byte[rfbModel.getBytesPerPixel()];
 
 		// Get the op and reset compression

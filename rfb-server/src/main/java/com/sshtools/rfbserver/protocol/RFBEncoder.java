@@ -38,11 +38,24 @@ import com.sshtools.rfbserver.encodings.CompressLevel9;
 import com.sshtools.rfbserver.encodings.CopyRectEncoding;
 import com.sshtools.rfbserver.encodings.CursorEncoding;
 import com.sshtools.rfbserver.encodings.CursorPositionEncoding;
+import com.sshtools.rfbserver.encodings.ExtendedDesktopSizeEncoding;
 import com.sshtools.rfbserver.encodings.HextileEncoding;
+import com.sshtools.rfbserver.encodings.JPEGQualityLevel0;
+import com.sshtools.rfbserver.encodings.JPEGQualityLevel1;
+import com.sshtools.rfbserver.encodings.JPEGQualityLevel2;
+import com.sshtools.rfbserver.encodings.JPEGQualityLevel3;
+import com.sshtools.rfbserver.encodings.JPEGQualityLevel4;
+import com.sshtools.rfbserver.encodings.JPEGQualityLevel5;
+import com.sshtools.rfbserver.encodings.JPEGQualityLevel6;
+import com.sshtools.rfbserver.encodings.JPEGQualityLevel7;
+import com.sshtools.rfbserver.encodings.JPEGQualityLevel8;
+import com.sshtools.rfbserver.encodings.JPEGQualityLevel9;
 import com.sshtools.rfbserver.encodings.RFBResizeEncoding;
 import com.sshtools.rfbserver.encodings.RFBServerEncoding;
 import com.sshtools.rfbserver.encodings.RREEncoding;
 import com.sshtools.rfbserver.encodings.RawEncoding;
+import com.sshtools.rfbserver.encodings.TightEncoding;
+import com.sshtools.rfbserver.encodings.TightPNGEncoding;
 import com.sshtools.rfbserver.encodings.XCursorEncoding;
 import com.sshtools.rfbserver.encodings.ZLIBEncoding;
 import com.sshtools.rfbserver.encodings.ZRLEEncoding;
@@ -65,9 +78,6 @@ public class RFBEncoder {
         addEncoding(new RawEncoding());
         addEncoding(new RREEncoding());
 
-        // TODO not complete
-        // addEncoding(new ZRLEEncoding());
-
         addEncoding(new ZLIBEncoding());
         addEncoding(new CompressLevel0());
         addEncoding(new CompressLevel1());
@@ -80,6 +90,18 @@ public class RFBEncoder {
         addEncoding(new CompressLevel8());
         addEncoding(new CompressLevel9());
         addEncoding(new HextileEncoding());
+        addEncoding(new TightEncoding());
+        addEncoding(new TightPNGEncoding());
+        addEncoding(new JPEGQualityLevel0());
+        addEncoding(new JPEGQualityLevel1()); 
+        addEncoding(new JPEGQualityLevel2());
+        addEncoding(new JPEGQualityLevel3());
+        addEncoding(new JPEGQualityLevel4());
+        addEncoding(new JPEGQualityLevel5());
+        addEncoding(new JPEGQualityLevel6());
+        addEncoding(new JPEGQualityLevel7());
+        addEncoding(new JPEGQualityLevel8());
+        addEncoding(new JPEGQualityLevel9());
         addEncoding(new ZRLEEncoding());
         addEncoding(new RFBResizeEncoding());
         addEncoding(new CursorEncoding());
@@ -87,6 +109,7 @@ public class RFBEncoder {
         addEncoding(new XCursorEncoding());
         addEncoding(new CORREEncoding());
         addEncoding(new CopyRectEncoding());
+        addEncoding(new ExtendedDesktopSizeEncoding());
     }
 
     public void addEncoding(RFBServerEncoding enc) {
@@ -135,7 +158,7 @@ public class RFBEncoder {
         return encodings.containsKey(type) ? encodings.get(type) : null;
     }
 
-    public UpdateRectangle<? extends Object> resizeWindow(DisplayDriver displayDriver, int width, int height) {
+    public UpdateRectangle<? extends Object> resizeWindow(DisplayDriver displayDriver, int width, int height, boolean clientInitiated) {
         RFBServerEncoding resizeEncoding = getEnabledEncoding(RFBConstants.ENC_NEW_FB_SIZE);
         UpdateRectangle<Void> updateRectangle = resizeEncoding == null ? null : new UpdateRectangle<Void>(displayDriver,
                         new Rectangle(0, 0, width, height), resizeEncoding.getType().getCode());
@@ -156,9 +179,9 @@ public class RFBEncoder {
     }
 
     public UpdateRectangle<PointerShape> pointerShapeUpdate(DisplayDriver displayDriver, PointerShape change) {
-        RFBServerEncoding pointerShapeEncoding = getEnabledEncoding(RFBConstants.ENC_X11_CURSOR);
+        RFBServerEncoding pointerShapeEncoding = getEnabledEncoding(RFBConstants.ENC_RICH_CURSOR);
         if (pointerShapeEncoding == null) {
-            pointerShapeEncoding = getEnabledEncoding(RFBConstants.ENC_RICH_CURSOR);
+            pointerShapeEncoding = getEnabledEncoding(RFBConstants.ENC_X11_CURSOR);
             if (pointerShapeEncoding == null) {
                 return null;
             }
@@ -205,7 +228,6 @@ public class RFBEncoder {
         if (rectangle.height + rectangle.y > displayDriver.getHeight()) {
             rectangle.height = displayDriver.getHeight() - rectangle.y;
         }
-        System.err.println(">>>> " +rectangle);
         if (rectangle.width == 0 || rectangle.height == 0) {
             // Update is out of bounds
             LOG.warn("Rectangle out of bounds, skipping: " + rectangle);

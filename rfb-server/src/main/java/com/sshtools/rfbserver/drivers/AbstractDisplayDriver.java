@@ -4,6 +4,9 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sshtools.rfbcommon.ScreenData;
+import com.sshtools.rfbcommon.ScreenDetail;
+import com.sshtools.rfbcommon.ScreenDimension;
 import com.sshtools.rfbserver.DisplayDriver;
 import com.sshtools.rfbserver.UpdateRectangle;
 
@@ -56,6 +59,18 @@ public abstract class AbstractDisplayDriver implements DisplayDriver {
 		mouseListeners.remove(listener);
 	}
 
+	@Override
+	public void resize(ScreenData screen) {
+	}
+
+	@Override
+	public ScreenData getExtendedScreenData() {
+		ScreenDimension dim = new ScreenDimension(getWidth(), getHeight());
+		ScreenData sd = new ScreenData(dim);
+		sd.getDetails().add(new ScreenDetail(0, 0, 0, dim, 0));
+		return sd;
+	}
+
 	protected void mouseMoved(int x, int y) {
 		if (x != mx || y != my) {
 			mx = x;
@@ -106,9 +121,9 @@ public abstract class AbstractDisplayDriver implements DisplayDriver {
 		}
 	}
 
-	protected void fireScreenBoundsChanged(Rectangle newBounds) {
+	protected void fireScreenBoundsChanged(Rectangle newBounds, boolean clientInitiated) {
 		for (ScreenBoundsListener l : new ArrayList<ScreenBoundsListener>(screenChangeListeners)) {
-			l.resized(newBounds);
+			l.resized(newBounds, clientInitiated);
 		}
 	}
 
@@ -117,8 +132,8 @@ public abstract class AbstractDisplayDriver implements DisplayDriver {
 			l.update(update);
 		}
 	}
-	
+
 	public String toString() {
-		return getClass().getSimpleName(); 
+		return getClass().getSimpleName();
 	}
 }

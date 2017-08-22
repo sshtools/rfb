@@ -18,6 +18,7 @@ import com.sshtools.rfb.encoding.RREEncoding;
 import com.sshtools.rfb.encoding.RawEncoding;
 import com.sshtools.rfb.encoding.RichCursorEncoding;
 import com.sshtools.rfb.encoding.TightEncoding;
+import com.sshtools.rfb.encoding.TightPNGEncoding;
 import com.sshtools.rfb.encoding.XCursorEncoding;
 import com.sshtools.rfb.encoding.ZLIBEncoding;
 import com.sshtools.rfb.encoding.ZRLEEncoding;
@@ -96,6 +97,7 @@ public class RFBContext implements Serializable {
 		registerEncoding(new RFBResizeEncoding());
 		registerEncoding(new LastRectEncoding());
 		registerEncoding(new TightEncoding());
+		registerEncoding(new TightPNGEncoding());
 		registerEncoding(new XCursorEncoding());
 		registerEncoding(new RichCursorEncoding());
 		registerEncoding(new CursorPositionEncoding());

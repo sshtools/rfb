@@ -3,6 +3,7 @@ package com.sshtools.rfbserver.files.uvnc;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbcommon.RFBConstants;
 import com.sshtools.rfbserver.protocol.Reply;
 
@@ -18,7 +19,7 @@ public abstract class FileTransfer<T> extends Reply<T> {
     }
 
     @Override
-    public final void write(DataOutputStream dout) throws IOException {
+    public final void write(ProtocolWriter dout) throws IOException {
         dout.write(type);
         dout.write(contentParam & 0xff);
         dout.write(contentParam >> 8);

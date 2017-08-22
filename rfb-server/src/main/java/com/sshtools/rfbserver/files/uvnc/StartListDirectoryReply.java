@@ -4,7 +4,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.sshtools.rfbcommon.RFBConstants;
-import com.sshtools.rfbserver.protocol.Reply;
 
 public class StartListDirectoryReply extends FileTransfer<String> {
 

@@ -41,7 +41,7 @@ public class Test extends Application implements RFBEventHandler {
 
 		Socket s;
 		try {
-			s = new Socket("localhost", 5900);
+			s = new Socket("blue", 5900);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

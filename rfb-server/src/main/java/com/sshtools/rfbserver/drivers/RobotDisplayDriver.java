@@ -21,10 +21,8 @@ import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sshtools.rfbserver.DisplayDriver;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.keysym;
-import com.sshtools.rfbserver.DisplayDriver.PointerShape;
 
 public class RobotDisplayDriver extends AbstractDisplayDriver implements ClipboardOwner {
 

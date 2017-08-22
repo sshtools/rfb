@@ -1,8 +1,6 @@
 /* HEADER */
 package com.sshtools.rfb.swing;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.io.IOException;
 
 import com.sshtools.rfb.ProtocolEngine;
@@ -14,7 +12,6 @@ import com.sshtools.rfb.RFBRectangle;
 import com.sshtools.rfb.RFBToolkit;
 import com.sshtools.rfb.RFBToolkit.RFBCursor;
 import com.sshtools.rfb.RFBTransport;
-import com.sshtools.rfb.swing.JavaFXRFBToolkit.RFBGraphics2D;
 import com.sshtools.rfb.swing.JavaFXRFBToolkit.RFBJavaFXCursor;
 
 import javafx.beans.value.ChangeListener;

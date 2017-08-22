@@ -69,7 +69,7 @@ public class XCursorEncoding implements RFBEncoding {
 						if ((maskByte >> n & 1) != 0) {
 							bim.setRGB(i, dy, colors[pixByte >> n & 1]);
 						} else {
-							bim.setRGB(i, dy, 0xff000000);
+							bim.setRGB(i, dy, 0x00ffffff);
 						}
 						i++;
 					}
@@ -79,7 +79,7 @@ public class XCursorEncoding implements RFBEncoding {
 						bim.setRGB(i, dy,
 								colors[pixBuf[dy * bytesPerRow + dx] >> n & 1]);
 					} else {
-						bim.setRGB(i, dy, 0xff000000);
+						bim.setRGB(i, dy, 0x00ffffff);
 					}
 				}
 			}

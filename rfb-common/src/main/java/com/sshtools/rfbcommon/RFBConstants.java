@@ -1,8 +1,5 @@
 package com.sshtools.rfbcommon;
 
-import java.util.Arrays;
-import java.util.List;
-
 public interface RFBConstants {
 	
 	// Keysysm
@@ -49,6 +46,7 @@ public interface RFBConstants {
 	public final static int CMSG_KEYBOARD_EVENT = 4;
 	public final static int CMSG_POINTER_EVENT = 5;
 	public final static int CMSG_CUT_TEXT = 6;
+	public final static int CMSG_SET_DESKTOP_SIZE = 251;
 	// Server messages
 	public final static int SMSG_FRAMEBUFFER_UPDATE = 0;
 	public final static int SMSG_SET_COLORMAP = 1;
@@ -133,6 +131,7 @@ public interface RFBConstants {
 	public static final String ENC_ZLIB_SIG = "ZLIB____";
 	public static final String ENC_ZRLE_SIG = "ZRLE____";
 	public static final String ENC_TIGHT_SIG = "TIGHT___";
+	public static final String ENC_TIGHT_PNG_SIG = "TIGHTPNG";
 	public static final String ENC_ZLIBHEX_SIG = "ZLIBHEX_";
 	public static final String ENC_POINTER_POS_SIG = "POINTPOS";
 	public static final String ENC_COMPRESS_SIG = "COMPRLVL";
@@ -141,6 +140,7 @@ public interface RFBConstants {
 	public static final String ENC_LAST_RECT_SIG = "LASTRECT";
 	public static final String ENC_NEW_FB_SIZE_SIG = "NEWFBSIZ";
 	public static final String ENC_JPEG_QUALITY_SIG = "JPEGQLVL";
+	public static final String ENC_EXTENDED_FB_SIZE_SIG = "EXTFBSIZ";
 
 	public static final String NO_AUTH_SIG = "NOAUTH__";
 	public static final String VNC_AUTH_SIG = "VNCAUTH_";
@@ -158,13 +158,16 @@ public interface RFBConstants {
 	public final static int ENC_TIGHT = 7;
 	public final static int ENC_ZLIBHEX = 8;
 	public final static int ENC_ZRLE = 16;
+	public final static int ENC_TIGHT_PNG = -260;
 
 	public final static int ENC_POINTER_POS = 0xffffff18;
 	public final static int ENC_RICH_CURSOR = 0xffffff11;
 	public final static int ENC_X11_CURSOR = 0xffffff10;
 	public final static int ENC_COMPRESS_LEVEL0 = 0xFFFFFF00;
+	public final static int ENC_JPEG_QUALITY_LEVEL0 = -32;
 	public final static int ENC_LAST_RECT = 0xFFFFFF20;
 	public final static int ENC_NEW_FB_SIZE = 0xFFFFFF21;
+	public final static int ENC_EXTENDED_FB_SIZE = 0xFFFFFECC;
 
 	// Caps
 	public static final TightCapability CAP_ENC_RAW = new TightCapability(
@@ -185,6 +188,8 @@ public interface RFBConstants {
 			ENC_ZLIBHEX, RFB_STANDARD_VENDOR, ENC_ZLIBHEX_SIG);
 	public static final TightCapability CAP_ENC_ZRLE = new TightCapability(
 			ENC_ZRLE, RFB_TRIDIA_VNC_VENDOR, ENC_ZRLE_SIG);
+	public static final TightCapability CAP_ENC_TIGHT_PNG = new TightCapability(
+			ENC_TIGHT_PNG, RFB_TIGHT_VNC_VENDOR, ENC_TIGHT_PNG_SIG);
 
 	public static final TightCapability CAP_ENC_COMPRESS = new TightCapability(
 			ENC_COMPRESS_LEVEL0, RFB_STANDARD_VENDOR, ENC_COMPRESS_SIG);
@@ -199,7 +204,9 @@ public interface RFBConstants {
 	public static final TightCapability CAP_ENC_NEW_FB_SIZE = new TightCapability(
 			ENC_NEW_FB_SIZE, RFB_STANDARD_VENDOR, ENC_NEW_FB_SIZE_SIG);
 	public static final TightCapability CAP_ENC_JPEG_QUALITY = new TightCapability(
-			ENC_POINTER_POS, RFB_TIGHT_VNC_VENDOR, ENC_JPEG_QUALITY_SIG);
+			ENC_JPEG_QUALITY_LEVEL0, RFB_TIGHT_VNC_VENDOR, ENC_JPEG_QUALITY_SIG);
+	public static final TightCapability CAP_ENC_EXTENDED_FB_SIZE = new TightCapability(
+			ENC_EXTENDED_FB_SIZE, RFB_STANDARD_VENDOR, ENC_EXTENDED_FB_SIZE_SIG);
 
 	public static final TightCapability CAP_AUTH_NONE = new TightCapability(
 			SCHEME_NO_AUTHENTICATION, RFB_STANDARD_VENDOR, NO_AUTH_SIG);

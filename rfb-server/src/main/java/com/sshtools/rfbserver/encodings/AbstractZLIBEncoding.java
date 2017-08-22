@@ -9,6 +9,7 @@ import java.util.zip.Deflater;
 import com.jcraft.jzlib.JZlib;
 import com.jcraft.jzlib.ZStream;
 import com.sshtools.rfbcommon.PixelFormat;
+import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
 
@@ -33,7 +34,7 @@ public abstract class AbstractZLIBEncoding extends AbstractRawEncoding {
         return false;
     }
 
-    public synchronized void encode(UpdateRectangle<?> update, DataOutputStream dout, PixelFormat pixelFormat, RFBClient client)
+    public synchronized void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
                     throws IOException {
 
         boolean useJZLib = true;
@@ -70,11 +71,19 @@ public abstract class AbstractZLIBEncoding extends AbstractRawEncoding {
 
     public synchronized void jzlibEncode(UpdateRectangle<?> update, DataOutputStream dout, PixelFormat pixelFormat, RFBClient client)
                     throws IOException {
-
-        @SuppressWarnings("unchecked")
-        long pstarted = System.currentTimeMillis();
         byte[] uncompressed = prepareEncode((UpdateRectangle<BufferedImage>) update, pixelFormat);
-        int uncompressedLen = uncompressed.length;
+        ByteArrayOutputStream compressOut = compress(uncompressed);
+
+        // Write the actual message
+        dout.writeInt(getType().getCode());
+        byte[] out = compressOut.toByteArray();
+        int length = out.length;
+        dout.writeInt(length);
+        dout.write(out);
+    }
+
+	protected ByteArrayOutputStream compress(byte[] uncompressed) throws IOException {
+		int uncompressedLen = uncompressed.length;
         int maxCompressed = uncompressed.length + ((uncompressed.length + 99) / 100) + 12;
         byte[] tmpbuf = new byte[maxCompressed];
 
@@ -102,13 +111,7 @@ public abstract class AbstractZLIBEncoding extends AbstractRawEncoding {
                     throw new IOException("compress: deflate returnd " + status);
             }
         } while (deflater.avail_out == 0);
-
-        // Write the actual message
-        dout.writeInt(getType().getCode());
-        byte[] out = compressOut.toByteArray();
-        int length = out.length;
-        dout.writeInt(length);
-        dout.write(out);
-    }
+		return compressOut;
+	}
 
 }

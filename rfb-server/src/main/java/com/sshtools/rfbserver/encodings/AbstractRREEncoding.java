@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.sshtools.rfbcommon.ImageUtil;
 import com.sshtools.rfbcommon.PaletteAnalyser;
 import com.sshtools.rfbcommon.PixelFormat;
+import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbcommon.RFBConstants;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
@@ -26,7 +27,7 @@ public abstract class AbstractRREEncoding extends AbstractRawEncoding {
     public AbstractRREEncoding() {
     }
 
-    public void encode(UpdateRectangle<?> update, DataOutputStream dout, PixelFormat pixelFormat, RFBClient client)
+    public void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
                     throws IOException {
 
         BufferedImage img = (BufferedImage) update.getData();

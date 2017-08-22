@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sshtools.rfbcommon.RFBConstants;
-import com.sshtools.rfbserver.protocol.Reply;
 
 public class ListDrivesReply extends FileTransfer<List<RFBDrive>> {
 

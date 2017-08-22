@@ -21,7 +21,7 @@ import com.sshtools.rfbserver.transport.RFBServerTransport;
 import com.sshtools.rfbserver.transport.RFBServerTransportFactory;
 import com.sshtools.rfbserver.transport.ServerSocketRFBServerTransportFactory;
 
-public class RFBServer {
+public class RFBServer implements RFBClientContext {
     final static Logger LOG = LoggerFactory.getLogger(RFBServer.class);
     public final static RFBVersion RFB_VERSION = new RFBVersion(3, 8);
 
@@ -151,7 +151,7 @@ public class RFBServer {
         return configuration;
     }
 
-    protected void runTransport(RFBServerTransport transport) throws IOException {
+    public void runTransport(RFBServerTransport transport, Runnable... onUpdate) throws IOException {
         LOG.info("Got connection");
         RFBClient client = createClient();
         synchronized (driverLock) {
@@ -166,7 +166,7 @@ public class RFBServer {
             clients.put(client, transport);
         }
         try {
-            client.run(transport);
+            client.run(transport, onUpdate);
         } finally {
             clients.remove(client);
             onClientDestroyed(client);

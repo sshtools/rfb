@@ -4,6 +4,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
+import com.sshtools.rfbcommon.ScreenData;
+
 public interface DisplayDriver {
 
 	public class PointerShape {
@@ -91,7 +93,7 @@ public interface DisplayDriver {
 	}
 
 	public interface ScreenBoundsListener {
-		void resized(Rectangle newBounds);
+		void resized(Rectangle newBounds, boolean clientInitiated);
 	}
 
 	public interface WindowListener {
@@ -157,4 +159,8 @@ public interface DisplayDriver {
 	void setClipboardText(String string);
 
 	BufferedImage grabArea(Rectangle area);
+	
+	void resize(ScreenData screen);
+
+	ScreenData getExtendedScreenData();
 }

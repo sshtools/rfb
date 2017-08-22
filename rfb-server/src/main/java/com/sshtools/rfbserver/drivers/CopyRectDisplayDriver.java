@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import com.sshtools.rfbcommon.RFBConstants;
 import com.sshtools.rfbserver.DisplayDriver;
 import com.sshtools.rfbserver.UpdateRectangle;
-import com.sshtools.rfbserver.encodings.CopyRectEncoding;
 
 /**
  * A driver that intercepts the window move event, and uses copyrect to paint

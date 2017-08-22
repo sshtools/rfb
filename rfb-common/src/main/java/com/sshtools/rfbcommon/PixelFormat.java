@@ -6,19 +6,15 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PixelFormat {
-
 	public enum Type {
 		DIRECT, NATIVE
 	}
 
 	public final static PixelFormat DEFAULT_PIXEL_FORMAT = new PixelFormat();
-
-	// private Type type = Type.DIRECT;
 	private boolean bigEndian = true;
 	private boolean trueColour = true;
 	private int redMax = 255;
@@ -34,15 +30,8 @@ public class PixelFormat {
 	private int redMaxBits;
 	private int greenMaxBits;
 	private int blueMaxBits;
-
-	private int cpixelStart;
-
-	private int cpixelAdd;
-
 	private boolean fitsInLSCPIXEL;
-
 	private boolean fitsInMSCPIXEL;
-
 	private boolean supportsCPIXEL;
 
 	public PixelFormat() {
@@ -72,8 +61,7 @@ public class PixelFormat {
 	}
 
 	public boolean isDefault() {
-		return this == DEFAULT_PIXEL_FORMAT
-				|| this.equals(DEFAULT_PIXEL_FORMAT);
+		return this == DEFAULT_PIXEL_FORMAT || this.equals(DEFAULT_PIXEL_FORMAT);
 	}
 
 	public Map<Integer, Integer> getColorMap() {
@@ -145,7 +133,7 @@ public class PixelFormat {
 	public void setTrueColor(boolean trueColour) {
 		this.trueColour = trueColour;
 		recalcPop();
-        imageType = getImageTypeForFormat();
+		imageType = getImageTypeForFormat();
 	}
 
 	public int getRedMax() {
@@ -209,7 +197,7 @@ public class PixelFormat {
 	public void setBitsPerPixel(int bpp) {
 		this.bpp = bpp;
 		recalcPop();
-        imageType = getImageTypeForFormat();
+		imageType = getImageTypeForFormat();
 	}
 
 	public int getColorDepth() {
@@ -258,8 +246,7 @@ public class PixelFormat {
 	}
 
 	public boolean isCompatibleFormat(int type) {
-		return type == imageType
-				|| (type == BufferedImage.TYPE_INT_ARGB && imageType == BufferedImage.TYPE_INT_RGB)
+		return type == imageType || (type == BufferedImage.TYPE_INT_ARGB && imageType == BufferedImage.TYPE_INT_RGB)
 				|| (type == BufferedImage.TYPE_INT_RGB && imageType == BufferedImage.TYPE_INT_ARGB);
 	}
 
@@ -270,7 +257,6 @@ public class PixelFormat {
 	// public void setType(Type type) {
 	// this.type = type;
 	// }
-
 	public int getImageTypeForFormat() {
 		if (bpp == 32) {
 			return BufferedImage.TYPE_INT_RGB;
@@ -281,7 +267,7 @@ public class PixelFormat {
 		} else if (bpp == 15) {
 			return BufferedImage.TYPE_USHORT_555_RGB;
 		} else if (bpp == 8) {
-		    return BufferedImage.TYPE_BYTE_INDEXED;
+			return BufferedImage.TYPE_BYTE_INDEXED;
 		}
 		return 0;
 	}
@@ -327,7 +313,6 @@ public class PixelFormat {
 	// break;
 	// }
 	// }
-
 	public boolean setFromImageType(int imageType) {
 		try {
 			switch (imageType) {
@@ -407,17 +392,10 @@ public class PixelFormat {
 
 	@Override
 	public String toString() {
-		return "PixelFormat [bigEndian=" + bigEndian + ", trueColour="
-				+ trueColour + ", redMax=" + redMax + ", redShift=" + redShift
-				+ ", greenMax=" + greenMax + ", greenShift=" + greenShift
-				+ ", blueMax=" + blueMax + ", blueShift=" + blueShift
-				+ ", bpp=" + bpp + ", depth=" + depth
-				+ ", imageType="
-				+ imageType
-				// + ", type=" + type + ", redMaxBits=" + redMaxBits +
-				// ", greenMaxBits="
-				+ ", redMaxBits=" + redMaxBits + ", greenMaxBits="
-				+ greenMaxBits + ", blueMaxBits=" + blueMaxBits + "]";
+		return "PixelFormat [bigEndian=" + bigEndian + ", trueColour=" + trueColour + ", redMax=" + redMax + ", redShift="
+				+ redShift + ", greenMax=" + greenMax + ", greenShift=" + greenShift + ", blueMax=" + blueMax + ", blueShift="
+				+ blueShift + ", bpp=" + bpp + ", depth=" + depth + ", imageType=" + imageType
+				+ ", redMaxBits=" + redMaxBits + ", greenMaxBits=" + greenMaxBits + ", blueMaxBits=" + blueMaxBits + "]";
 	}
 
 	public int getRedMaxBits() {
@@ -444,12 +422,10 @@ public class PixelFormat {
 		redMaxBits = bitCount(redMax);
 		greenMaxBits = bitCount(greenMax);
 		blueMaxBits = bitCount(blueMax);
-		fitsInLSCPIXEL = (redMax << redShift) < (1 << 24)
-				&& (greenMax << greenShift) < (1 << 24)
+		fitsInLSCPIXEL = (redMax << redShift) < (1 << 24) && (greenMax << greenShift) < (1 << 24)
 				&& (blueMax << blueShift) < (1 << 24);
 		fitsInMSCPIXEL = redShift > 7 && greenShift > 7 && blueShift > 7;
-		supportsCPIXEL = trueColour && bpp == 32 && depth <= 24
-				&& (isFitsInLSCPIXEL() || isFitsInMSCPIXEL());
+		supportsCPIXEL = trueColour && bpp == 32 && depth <= 24 && (isFitsInLSCPIXEL() || isFitsInMSCPIXEL());
 	}
 
 	/**
@@ -497,5 +473,4 @@ public class PixelFormat {
 	public int getBytesPerCPIXEL() {
 		return isSupportsCPIXEL() ? 3 : (getBitsPerPixel() / 8);
 	}
-
 }

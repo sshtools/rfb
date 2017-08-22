@@ -1,13 +1,13 @@
 package com.sshtools.rfbserver.encodings;
 
 import java.awt.Point;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sshtools.rfbcommon.PixelFormat;
+import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbcommon.RFBConstants;
 import com.sshtools.rfbcommon.TightCapability;
 import com.sshtools.rfbserver.RFBClient;
@@ -27,7 +27,7 @@ public class CopyRectEncoding extends AbstractRawEncoding {
         return false;
     }
 
-    public void encode(UpdateRectangle<?> update, DataOutputStream dout, PixelFormat pixelFormat, RFBClient client)
+    public void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
                     throws IOException {
         UpdateRectangle<Point> u = (UpdateRectangle<Point>) update;
         LOG.info("CopyRect of " + u.getData() + " to " + update.getArea());
