@@ -1,7 +1,7 @@
 package com.sshtools.rfbserver.encodings;
 
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -26,61 +26,54 @@ public class TightEncoding extends AbstractTightEncoding {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void writeTightBasic(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, ProtocolWriter writer,
+	protected void writeTightBasic(UpdateRectangle<?> update, ProtocolWriter odout, PixelFormat pixelFormat, ProtocolWriter writer,
 			int[] tileBuf) throws IOException {
 		// TODO no gradient filter yet
-		dout.writeByte(OP_READ_FILTER_ID);
-		ByteArrayOutputStream tmp = new ByteArrayOutputStream();
-		DataOutputStream tmpDout = new DataOutputStream(tmp);
+		Rectangle area = update.getArea();
+		odout.writeByte(OP_READ_FILTER_ID);
 		boolean compress = true;
-		if (pan.getSize() <= 256) {
-			dout.write(OP_FILTER_PALETTE);
-			tmpDout.writeByte(pan.getPalette().length - 1);
-			for (int i = 0; i < pan.getPalette().length; i++)
-				TightUtil.writeTightColor(pan.getPalette()[i], pixelFormat, tmpDout);
-			if (pan.getSize() == 2) {
-				int b = 0;
-				int s = 7;
-				for (int i = 0; i < tileBuf.length; i++) {
-					if (tileBuf[i] == pan.getPalette()[1]) {
-						b |= 1 << s;
-					}
-					s--;
-					if (s < 0) {
-						tmpDout.writeByte(b);
+		int palSize = pan.getSize();
+		ByteArrayOutputStream tmp = new ByteArrayOutputStream();
+		ProtocolWriter dout = new ProtocolWriter(tmp);
+		if (palSize <= 256) {
+			odout.write(OP_FILTER_PALETTE);
+			odout.writeByte(palSize - 1);
+			for (int i = 0; i < palSize; i++)
+				TightUtil.writeTightColor(pan.getPalette()[i], pixelFormat, odout);
+			if (palSize == 2) {
+				int dx, dy, n;
+				int rowBytes = (area.width + 7) / 8;
+				byte b;
+				for (dy = 0; dy < area.height; dy++) {
+					for (dx = 0; dx < rowBytes; dx++) {
 						b = 0;
-						s = 7;
+						for (n = 0; b < 8 && n + dx < area.getWidth(); n++)
+							b |= tileBuf[(dy * area.width) + dx + n] == pan.getPalette()[1] ? 1 << (7 - n) : 0;
+						dout.writeByte(b);
 					}
 				}
-				if (s != 0)
-					tmpDout.writeByte(b);
 			} else {
 				for (int i = 0; i < tileBuf.length; i++) {
-					tmpDout.writeByte(pan.lookup(tileBuf[i]));
+					dout.writeByte(pan.lookup(tileBuf[i]));
 				}
 			}
 		} else {
-			compress = writeTightRaw((UpdateRectangle<BufferedImage>) update, dout, pixelFormat, tmpDout);
+			compress = writeTightRaw((UpdateRectangle<BufferedImage>) update, odout, pixelFormat, dout, tileBuf);
 		}
-		// TODO zlib streams... how do they work?
 		byte[] data = tmp.toByteArray();
-		if (data.length >= 12 && compress) {
+		if (data.length >= RFBConstants.TIGHT_MIN_BYTES_TO_COMPRESS && compress) {
 			byte[] compressed = compress(data).toByteArray();
-			LOG.info(String.format("Compressing %d to %d bytes.", data.length, compressed.length));
 			data = compressed;
-		} else {
-			LOG.info(String.format("Not compressing %d bytes.", data.length));
+			writer.writeCompactLen(data.length);
 		}
-		writer.writeCompactLen(data.length);
 		writer.write(data);
 	}
 
 	protected boolean writeTightRaw(UpdateRectangle<BufferedImage> update, ProtocolWriter dout, PixelFormat pixelFormat,
-			DataOutputStream tmpDout) throws IOException {
+			DataOutputStream tmpDout, int[] tileBuf) throws IOException {
 		dout.write(OP_FILTER_RAW);
 		if (TightUtil.isTightNative(pixelFormat)) {
-			DataBufferInt dataBuffer = (DataBufferInt) update.getData().getData().getDataBuffer();
-			for (int i : dataBuffer.getData()) {
+			for (int i : tileBuf) {
 				TightUtil.writeTightColor(i, pixelFormat, tmpDout);
 			}
 		} else

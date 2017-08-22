@@ -37,7 +37,7 @@ public class Test extends JFrame implements RFBEventHandler {
 		// context.setUseCopyRect(false);
 		context.setJpegQuality(0);
 		// context.setPixelFormat(RFBContext.PIXEL_FORMAT_8_BIT);
-		 context.setPreferredEncoding(RFBConstants.ENC_TIGHT_PNG);
+		 context.setPreferredEncoding(RFBConstants.ENC_TIGHT);
 		transport = new RFBTransport() {
 			@Override
 			public int getPort() {

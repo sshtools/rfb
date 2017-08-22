@@ -98,7 +98,7 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 			switch (filter) {
 			case OP_FILTER_RAW:
 				if (LOG.isDebugEnabled()) {
-					LOG.info("Raw");
+					LOG.debug("Raw");
 				}
 				buffer = readTight(pixSize * width * height);
 				if (tightNative) {
@@ -128,7 +128,9 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 				}
 				break;
 			case OP_FILTER_GRADIENT:
-				LOG.info("Gradient");
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Gradient");
+				}
 				buffer = readTight(pixSize * width * height);
 				decodeGradientData(x, y, width, height, buffer);
 				break;
@@ -193,7 +195,6 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 		if (null == zlibInflaters[streamId]) {
 			zlibInflaters[streamId] = new Inflater();
 		}
-		LOG.info(String.format("Reading zlib compressed block. %d uncompressed, %d compressed", len, raw));
 		Inflater decoder = zlibInflaters[streamId];
 		decoder.setInput(buffer, len, raw);
 		try {

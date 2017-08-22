@@ -31,7 +31,7 @@ public class CompressLevel0 implements RFBServerEncoding {
 		if (enc != null) {
 			int level = getLevel();
 			LOG.info("Setting compress level to " + level);
-			enc.setLevel(level);
+			enc.setZLibCompressLevel(level);
 		}
 	}
 

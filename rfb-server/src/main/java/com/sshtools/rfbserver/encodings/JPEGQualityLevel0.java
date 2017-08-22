@@ -34,7 +34,7 @@ public class JPEGQualityLevel0 implements RFBServerEncoding {
 			if (client.getPixelFormat().getColorDepth() >= 16) {
 				int level = getLevel();
 				LOG.info("Setting JPEG quality level to " + level);
-				enabledEncoding.setLevel(level);
+				enabledEncoding.setTightLevel(level);
 			} else {
 				LOG.warn(String.format("Cannot set compression level with color depth < 16 for ",
 						enabledEncoding.getType().getSignature()));

@@ -91,7 +91,7 @@ public class RFBEncoder {
         addEncoding(new CompressLevel9());
         addEncoding(new HextileEncoding());
         addEncoding(new TightEncoding());
-        addEncoding(new TightPNGEncoding());
+//        addEncoding(new TightPNGEncoding());
         addEncoding(new JPEGQualityLevel0());
         addEncoding(new JPEGQualityLevel1()); 
         addEncoding(new JPEGQualityLevel2());

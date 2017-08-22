@@ -36,7 +36,7 @@ public class TightPNGEncoding extends AbstractTightEncoding {
 
 	@Override
 	protected void encodeImage(BufferedImage img, ByteArrayOutputStream bout, ProtocolWriter dout) throws IOException {
-		if (level == -1) {
+		if (tightLevel == -1) {
 			dout.writeByte(OP_PNG << 4);
 			if (!ImageIO.write(img, "PNG", bout))
 				throw new IOException("Cannot encode as PNG");
