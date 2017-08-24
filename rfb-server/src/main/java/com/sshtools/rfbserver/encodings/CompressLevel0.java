@@ -12,10 +12,8 @@ import com.sshtools.rfbcommon.TightCapability;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
 
-public class CompressLevel0 implements RFBServerEncoding {
-
+public class CompressLevel0 implements RFBServerEncoding<Void> {
 	final static Logger LOG = LoggerFactory.getLogger(CompressLevel0.class);
-
 
 	public int getCode() {
 		return getType().getCode() + 0;
@@ -26,7 +24,7 @@ public class CompressLevel0 implements RFBServerEncoding {
 	}
 
 	public void selected(RFBClient client) {
-		RFBServerEncoding enabledEncoding = client.getEncoder().getEnabledEncoding(RFBConstants.ENC_ZLIB);
+		RFBServerEncoding<?> enabledEncoding = client.getEncoder().getEnabledEncoding(RFBConstants.ENC_ZLIB);
 		ZLIBEncoding enc = (ZLIBEncoding) enabledEncoding;
 		if (enc != null) {
 			int level = getLevel();
@@ -40,13 +38,12 @@ public class CompressLevel0 implements RFBServerEncoding {
 		return level;
 	}
 
-	public void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
+	public void encode(UpdateRectangle<Void> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
 		throw new UnsupportedOperationException();
 	}
 
-    public TightCapability getType() {
-        return RFBConstants.CAP_ENC_COMPRESS;
-    }
-
+	public TightCapability getType() {
+		return RFBConstants.CAP_ENC_COMPRESS;
+	}
 }

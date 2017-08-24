@@ -11,8 +11,6 @@ public class UpdateRectangle<T> {
     private DisplayDriver driver;
     private T data;
 
-    protected boolean important;
-
     public UpdateRectangle(DisplayDriver driver, Rectangle area, int encoding) {
         this.encoding = encoding;
         this.area = area;
@@ -33,15 +31,6 @@ public class UpdateRectangle<T> {
 
     public T getData() {
         return data;
-    }
-
-    public boolean isImportant() {
-        return important;
-    }
-
-    public UpdateRectangle<T> setImportant(boolean important) {
-        this.important = important;
-        return this;
     }
 
     public DisplayDriver getDriver() {

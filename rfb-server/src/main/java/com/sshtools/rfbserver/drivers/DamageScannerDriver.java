@@ -113,8 +113,8 @@ public class DamageScannerDriver extends FilteredDisplayDriver {
 	}
 
 	@Override
-	protected void filteredDamageEvent(String name, Rectangle rectangle, boolean important) {
-		super.filteredDamageEvent(name, rectangle, important);
+	protected void filteredDamageEvent(String name, Rectangle rectangle) {
+		super.filteredDamageEvent(name, rectangle);
 		synchronized (damage) {
 			damage.add(rectangle);
 		}
@@ -189,7 +189,7 @@ public class DamageScannerDriver extends FilteredDisplayDriver {
 			// Saves another grab
 			queuedImage.set(new QueuedImage(currentImage, area));
 			try {
-				fireDamageEvent("DamageDetection", area, false, -1);
+				fireDamageEvent("DamageDetection", area, -1);
 			} finally {
 				queuedImage.set(null);
 			}

@@ -20,6 +20,9 @@ import java.io.IOException;
 
 import javax.swing.JComponent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sshtools.rfb.ProtocolEngine;
 import com.sshtools.rfb.RFBContext;
 import com.sshtools.rfb.RFBDisplay;
@@ -31,17 +34,20 @@ import com.sshtools.rfb.RFBToolkit.RFBCursor;
 import com.sshtools.rfb.RFBTransport;
 import com.sshtools.rfb.swing.SwingRFBToolkit.RFBAWTCursor;
 import com.sshtools.rfb.swing.SwingRFBToolkit.RFBBufferedImage;
+import com.sshtools.rfbcommon.ScreenData;
+import com.sshtools.rfbcommon.ScreenDimension;
+
+import test.Test;
 
 public class SwingRFBDisplay extends JComponent
 		implements RFBDisplay<JComponent, KeyEvent>, KeyListener, MouseListener, MouseMotionListener {
-
+	final static Logger LOG = LoggerFactory.getLogger(Test.class);
 	private static final long serialVersionUID = 1L;
-
-	ProtocolEngine engine;
-	KeyListener keyListener;
-	RFBContext context;
-	RFBDisplayModel displayModel;
-	RFBRectangle updateRect;
+	private ProtocolEngine engine;
+	private KeyListener keyListener;
+	private RFBContext context;
+	private RFBDisplayModel displayModel;
+	private RFBRectangle updateRect;
 	private MouseEventDispatcher mouseEventDispatcher;
 
 	public SwingRFBDisplay() {
@@ -49,17 +55,14 @@ public class SwingRFBDisplay extends JComponent
 		setDoubleBuffered(true);
 		enableEvents(AWTEvent.FOCUS_EVENT_MASK | AWTEvent.ACTION_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK
 				| AWTEvent.MOUSE_EVENT_MASK);
-
 		try {
 			Class<?>[] params = new Class[] { boolean.class };
 			SwingRFBDisplay.class.getMethod("setFocusable", params).invoke(this, new Object[] { Boolean.TRUE });
-			SwingRFBDisplay.class.getMethod("setFocusTraversalKeysEnabled", params).invoke(this,
-					new Object[] { Boolean.FALSE });
+			SwingRFBDisplay.class.getMethod("setFocusTraversalKeysEnabled", params).invoke(this, new Object[] { Boolean.FALSE });
 		} catch (Throwable t) {
 			System.err.println("unable to reset focus handling for java version ");
 			t.printStackTrace();
 		}
-
 	}
 
 	@Override
@@ -67,29 +70,33 @@ public class SwingRFBDisplay extends JComponent
 		this.context = context;
 		context.resetEncodings();
 		displayModel = new RFBDisplayModel(this);
-
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
-				if (engine != null && SwingRFBDisplay.this.context.getScaleMode() != NO_SCALING
-						&& displayModel.getRfbWidth() != 0 && displayModel.getRfbHeight() != 0) {
-					displayModel.updateBuffer();
+				if (engine != null && SwingRFBDisplay.this.context.getScaleMode() != NO_SCALING) {
+//					if (SwingRFBDisplay.this.context.getScaleMode() == RESIZE_DESKTOP) {
+//						ScreenData sd = new ScreenData(displayModel.getScreenData());
+//						sd.getDimension()
+//								.set(new ScreenDimension(SwingRFBDisplay.this.getWidth(), SwingRFBDisplay.this.getHeight()));
+//						try {
+//							engine.setDesktopSize(sd);
+//						} catch (IOException e1) {
+//							LOG.warn("Failed to set remote desktop size.", e1);
+//						}
+//					} else
+						if (!displayModel.getScreenData().isEmpty())
+						displayModel.updateBuffer();
 				}
 			}
 		});
-
 		displayModel.setContext(context);
-
 		engine = new ProtocolEngine(this, transport, context, prompt, displayModel,
-				RFBToolkit.get().loadImage("/images/empty-cursor.png"),
-				RFBToolkit.get().loadImage("/images/dot-cursor.png")) {
+				RFBToolkit.get().loadImage("/images/empty-cursor.png"), RFBToolkit.get().loadImage("/images/dot-cursor.png")) {
 			@Override
 			public void disconnect() {
 				super.disconnect();
 			}
-
 		};
-
 		engine.setStopCursor(RFBToolkit.get().loadImage("/images/stop-cursor.png"));
 		addMouseListener(this);
 		addMouseMotionListener(this);
@@ -195,8 +202,8 @@ public class SwingRFBDisplay extends JComponent
 	public void requestRepaint(int tm, int x, int y, int w, int h) {
 		if (engine != null) {
 			repaint(tm, (int) (x * displayModel.getXscale()) + displayModel.getImagex() - 2,
-					(int) (y * displayModel.getYscale()) + displayModel.getImagey() - 2,
-					(int) (w * displayModel.getXscale()) + 4, (int) (h * displayModel.getYscale()) + 4);
+					(int) (y * displayModel.getYscale()) + displayModel.getImagey() - 2, (int) (w * displayModel.getXscale()) + 4,
+					(int) (h * displayModel.getYscale()) + 4);
 		}
 	}
 
@@ -244,7 +251,6 @@ public class SwingRFBDisplay extends JComponent
 
 	@Override
 	public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-
 		if ((infoflags & (ALLBITS | ABORT)) == 0) {
 			return true; // We need more image data.
 		}
@@ -303,14 +309,12 @@ public class SwingRFBDisplay extends JComponent
 	}
 
 	public void processLocalKeyEvent(KeyEvent evt) {
-
 		if (engine.isConnected() && engine.isProcessingEvents()) {
 			if (handleKeyEvent(evt)) {
 				if (!engine.isInputEnabled()) {
 					if ((evt.getKeyChar() == 'r' || evt.getKeyChar() == 'R') && evt.getID() == KeyEvent.KEY_PRESSED) {
 						try {
-							engine.requestFramebufferUpdate(0, 0, displayModel.getRfbWidth(),
-									displayModel.getRfbHeight(), false);
+							engine.requestFramebufferUpdate(0, 0, displayModel.getRfbWidth(), displayModel.getRfbHeight(), false);
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -380,7 +384,6 @@ public class SwingRFBDisplay extends JComponent
 		}
 		int mask4 = 8;
 		int mask5 = 16;
-
 		if (evt.getID() == MouseEvent.MOUSE_WHEEL) {
 			// #ifdef JAVA2
 			java.awt.event.MouseWheelEvent we = (java.awt.event.MouseWheelEvent) evt;
@@ -423,14 +426,12 @@ public class SwingRFBDisplay extends JComponent
 			y = displayModel.getRfbWidth() - 1;
 		}
 		engine.sendPointerEvent(modifiers, x, y);
-
 		// Button up must be sent on mouse wheel
 		if (evt.getID() == MouseEvent.MOUSE_WHEEL) {
 			engine.setPointerMask(engine.getPointerMask() & ~mask4);
 			engine.setPointerMask(engine.getPointerMask() & ~mask5);
 			engine.sendPointerEvent(modifiers, x, y);
 		}
-
 		// A bug? Without this my server (TightVNC 1.2.9 on Linux) doesnt seem
 		// to send a cursor update back upon click
 		// if (context.isCursorUpdatesRequested()) {
@@ -610,8 +611,7 @@ public class SwingRFBDisplay extends JComponent
 					if (lastEvent != null) {
 						postPointerEvent(lastEvent);
 						if (context.isLocalCursorDisplayed()) {
-							engine.setLocalCursor(displayModel.getCursor(), displayModel.getHotX(),
-									displayModel.getHotY());
+							engine.setLocalCursor(displayModel.getCursor(), displayModel.getHotX(), displayModel.getHotY());
 						} else {
 							doMoveCursor(lastEvent.getX(), lastEvent.getY());
 						}
@@ -635,8 +635,7 @@ public class SwingRFBDisplay extends JComponent
 						events = 0;
 					} else {
 						if (context.isLocalCursorDisplayed()) {
-							engine.setLocalCursor(displayModel.getCursor(), displayModel.getHotX(),
-									displayModel.getHotY());
+							engine.setLocalCursor(displayModel.getCursor(), displayModel.getHotX(), displayModel.getHotY());
 						} else {
 							engine.setLocalCursor(engine.getDotCursor(), 2, 2);
 						}

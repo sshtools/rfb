@@ -9,6 +9,8 @@ import java.awt.image.BufferedImage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sshtools.rfbcommon.ScreenData;
+import com.sshtools.rfbcommon.ScreenDimension;
 import com.sshtools.rfbserver.DisplayDriver;
 import com.sshtools.rfbserver.RFBClient;
 
@@ -21,9 +23,7 @@ import com.sshtools.rfbserver.RFBClient;
  * 
  */
 public class WindowedDisplayDriver extends FilteredDisplayDriver {
-
 	final static Logger LOG = LoggerFactory.getLogger(WindowedDisplayDriver.class);
-
 	private int monitor = -1;
 	private Rectangle area;
 	private GraphicsDevice[] devices;
@@ -97,11 +97,11 @@ public class WindowedDisplayDriver extends FilteredDisplayDriver {
 	}
 
 	@Override
-	protected void filteredDamageEvent(String name, Rectangle rectangle, boolean important) {
+	protected void filteredDamageEvent(String name, Rectangle rectangle) {
 		Rectangle bounds = alterBounds(rectangle);
 		if (bounds != null) {
 			LOG.debug("Virtual damage at: " + name + " / " + bounds);
-			fireDamageEvent(name, bounds, important, -1);
+			fireDamageEvent(name, bounds, -1);
 		}
 	}
 
@@ -140,18 +140,16 @@ public class WindowedDisplayDriver extends FilteredDisplayDriver {
 	}
 
 	@Override
-	protected void filteredScreenBoundsChanged(Rectangle rectangle, boolean clientInitiated) {
+	protected void filteredScreenBoundsChanged(ScreenData rectangle, boolean clientInitiated) {
 		Rectangle actualBounds = getActualBounds();
-
 		// Shrink the viewport if the underlying driver now has a smaller screen
-		if (rectangle.width < actualBounds.width && area != null) {
-			area.width = rectangle.width;
+		if (rectangle.getWidth() < actualBounds.width && area != null) {
+			area.width = rectangle.getWidth();
 		}
-		if (rectangle.height < actualBounds.height && area != null) {
-			area.height = rectangle.height;
+		if (rectangle.getHeight() < actualBounds.height && area != null) {
+			area.height = rectangle.getHeight();
 		}
-
-		fireScreenBoundsChanged(makeRelativeToBounds(rectangle, actualBounds), clientInitiated);
+		fireScreenBoundsChanged(getScreenData(makeRelativeToBounds(getScreenBounds(rectangle), actualBounds)), clientInitiated);
 	}
 
 	public void mouseEvent(RFBClient client, int buttonMask, int x, int y) {
@@ -212,6 +210,14 @@ public class WindowedDisplayDriver extends FilteredDisplayDriver {
 		return newArea;
 	}
 
+	private ScreenData getScreenData(Rectangle makeRelativeToBounds) {
+		return new ScreenData(new ScreenDimension(makeRelativeToBounds.width, makeRelativeToBounds.height));
+	}
+
+	private Rectangle getScreenBounds(ScreenData data) {
+		return new Rectangle(0, 0, data.getWidth(), data.getHeight());
+	}
+
 	private Rectangle makeRelativeToBounds(Rectangle area, Rectangle bounds) {
 		if (area == null) {
 			return null;
@@ -224,7 +230,6 @@ public class WindowedDisplayDriver extends FilteredDisplayDriver {
 			if (newArea.y + newArea.height > bounds.y + bounds.height) {
 				newArea.height -= (newArea.y + newArea.height) - (bounds.y + bounds.height);
 			}
-
 			newArea.x -= bounds.x;
 			if (newArea.x < 0) {
 				newArea.width += newArea.x;
@@ -239,7 +244,6 @@ public class WindowedDisplayDriver extends FilteredDisplayDriver {
 			return null;
 		}
 		return newArea;
-
 	}
 
 	public void destroy() {
@@ -250,7 +254,6 @@ public class WindowedDisplayDriver extends FilteredDisplayDriver {
 
 	public static void main(String[] args) {
 		WindowedDisplayDriver wdd = new WindowedDisplayDriver(new AbstractDisplayDriver() {
-
 			public void setClipboardText(String string) {
 			}
 

@@ -49,18 +49,17 @@ public class CopyRectDisplayDriver extends FilteredDisplayDriver {
 	protected void filteredWindowMoved(String name, Rectangle rectangle, Rectangle oldRectangle) {
 		if (oldRectangle != null && rectangle != null) {
 			UpdateRectangle<Point> update = new UpdateRectangle<Point>(this, rectangle, RFBConstants.ENC_COPYRECT);
-			update.setImportant(true);
 			update.setData(new Point(oldRectangle.x, oldRectangle.y));
 			LOG.info("Copyrect updated " + update);
 			fireUpdate(update);
 			if (rectangle.intersects(oldRectangle)) {
 				for (Rectangle reducedRectangle : subtractRectangle(rectangle, oldRectangle)) {
 					LOG.info("Moved window damage at " + reducedRectangle);
-					fireDamageEvent(name, reducedRectangle, true, -1);
+					fireDamageEvent(name, reducedRectangle, -1);
 				}
 			} else {
 				LOG.info("Moved window damage at " + oldRectangle);
-				fireDamageEvent(name, oldRectangle, true, -1);
+				fireDamageEvent(name, oldRectangle, -1);
 			}
 		} else {
 			super.filteredWindowMoved(name, rectangle, oldRectangle);

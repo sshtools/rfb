@@ -9,8 +9,7 @@ import com.sshtools.rfbcommon.TightCapability;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
 
-public class RFBResizeEncoding extends AbstractEncoding {
-
+public class RFBResizeEncoding extends AbstractEncoding<Void> {
 	public RFBResizeEncoding() {
 	}
 
@@ -22,12 +21,11 @@ public class RFBResizeEncoding extends AbstractEncoding {
 		return true;
 	}
 
-	public void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client) throws IOException {
+	public void encode(UpdateRectangle<Void> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
+			throws IOException {
 		dout.writeInt(getType().getCode());
 	}
 
 	public void selected(RFBClient client) {
-		
 	}
-
 }

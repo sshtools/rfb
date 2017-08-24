@@ -4,44 +4,33 @@ import java.io.IOException;
 
 import com.sshtools.rfb.RFBDisplay;
 import com.sshtools.rfb.RFBEncoding;
+import com.sshtools.rfbcommon.RFBConstants;
 
 public class CopyRectEncoding implements RFBEncoding {
+	public CopyRectEncoding() {
+	}
 
-    public CopyRectEncoding() {
-    }
-
-    @Override
+	@Override
 	public boolean isPseudoEncoding() {
-        return false;
-    }
+		return false;
+	}
 
-    @Override
+	@Override
 	public int getType() {
-        return 1;
-    }
+		return RFBConstants.ENC_COPYRECT;
+	}
 
-    @Override
-	public void processEncodedRect(RFBDisplay display, int x, int y, int width, int height, int encodingType) throws IOException {
+	@Override
+	public void processEncodedRect(RFBDisplay<?, ?> display, int x, int y, int width, int height, int encodingType)
+			throws IOException {
+		int posx = display.getEngine().getInputStream().readUnsignedShort();
+		int posy = display.getEngine().getInputStream().readUnsignedShort();
+		display.getDisplayModel().getGraphicBuffer().copyArea(posx, posy, width, height, x - posx, y - posy);
+		display.requestRepaint(display.getContext().getScreenUpdateTimeout(), x, y, width, height);
+	}
 
-        // Get the position of the area
-        int posx = display.getEngine().getInputStream().readUnsignedShort();
-        int posy = display.getEngine().getInputStream().readUnsignedShort();
-
-        // Copy the area
-        display.getDisplayModel().getGraphicBuffer().copyArea(posx, posy, width, height, x - posx, y - posy);
-
-        // Request a repaint
-        display.requestRepaint(display.getContext().getScreenUpdateTimeout(), x, y, width, height);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sshtools.rfb.RFBEncoding#getName()
-     */
-    @Override
+	@Override
 	public String getName() {
-        return "CopyRect";
-    }
-
+		return "CopyRect";
+	}
 }

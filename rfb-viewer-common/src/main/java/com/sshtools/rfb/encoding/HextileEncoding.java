@@ -5,18 +5,16 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.sshtools.rfb.ProtocolEngine;
-import com.sshtools.rfb.RFBContext;
 import com.sshtools.rfb.RFBDisplay;
 import com.sshtools.rfb.RFBDisplayModel;
 import com.sshtools.rfb.RFBToolkit;
 import com.sshtools.rfb.RFBToolkit.RFBColor;
 import com.sshtools.rfb.RFBToolkit.RFBGraphicsContext;
 import com.sshtools.rfbcommon.ImageUtil;
+import com.sshtools.rfbcommon.RFBConstants;
 
 public class HextileEncoding extends AbstractRawEncoding {
-
 	private RFBColor hextile_bg, hextileForeground;
-
 	// Hextile sub encodings
 	final int HEXTILE_RAW = 1 << 0;
 	final int HEXTILE_BACKGROUND = 1 << 1;
@@ -38,7 +36,8 @@ public class HextileEncoding extends AbstractRawEncoding {
 	}
 
 	@Override
-	public void processEncodedRect(RFBDisplay display, int x, int y, int width, int height, int encodingType) throws IOException {
+	public void processEncodedRect(RFBDisplay<?, ?> display, int x, int y, int width, int height, int encodingType)
+			throws IOException {
 		ProtocolEngine engine = display.getEngine();
 		RFBDisplayModel model = display.getDisplayModel();
 		DataInputStream in = engine.getInputStream();
@@ -56,9 +55,9 @@ public class HextileEncoding extends AbstractRawEncoding {
 				}
 				int subencoding = in.readUnsignedByte();
 				RFBGraphicsContext g = model.getGraphicBuffer();
-				Map<Integer, Integer> colors  = model.getColorMap();
+				Map<Integer, Integer> colors = model.getColorMap();
 				if ((subencoding & HEXTILE_RAW) != 0) {
-					engine.getContext().selectEncoding(RFBContext.ENCODING_RAW).processEncodedRect(display, tx, ty, tw, th, 0);
+					engine.getContext().selectEncoding(RFBConstants.ENC_RAW).processEncodedRect(display, tx, ty, tw, th, 0);
 					continue;
 				}
 				byte[] cbuf = new byte[model.getBitsPerPixel() / 8];
@@ -129,17 +128,10 @@ public class HextileEncoding extends AbstractRawEncoding {
 			}
 		}
 		display.requestRepaint(display.getContext().getScreenUpdateTimeout(), x, y, width, height);
-
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.sshtools.rfb.RFBEncoding#getName()
-	 */
 	@Override
 	public String getName() {
 		return "Hextile";
 	}
-
 }

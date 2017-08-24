@@ -8,7 +8,7 @@ import com.sshtools.rfbcommon.TightCapability;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
 
-public interface RFBServerEncoding {
+public interface RFBServerEncoding<D> {
 	void selected(RFBClient client);
 	
 	int getCode();
@@ -17,6 +17,6 @@ public interface RFBServerEncoding {
 
 	boolean isPseudoEncoding();
 
-	void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client) throws IOException;
+	void encode(UpdateRectangle<D> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client) throws IOException;
 
 }

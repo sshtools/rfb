@@ -10,6 +10,7 @@ import com.sshtools.rfb.RFBToolkit;
 import com.sshtools.rfb.RFBToolkit.RFBColor;
 import com.sshtools.rfb.RFBToolkit.RFBGraphicsContext;
 import com.sshtools.rfbcommon.ImageUtil;
+import com.sshtools.rfbcommon.RFBConstants;
 
 public class CORREEncoding extends AbstractRawEncoding {
 	public CORREEncoding() {
@@ -17,7 +18,7 @@ public class CORREEncoding extends AbstractRawEncoding {
 
 	@Override
 	public int getType() {
-		return 4;
+		return RFBConstants.ENC_CORRE;
 	}
 
 	@Override
@@ -26,12 +27,11 @@ public class CORREEncoding extends AbstractRawEncoding {
 	}
 
 	@Override
-	public void processEncodedRect(RFBDisplay display, int x, int y, int width, int height, int encodingType) throws IOException {
-
+	public void processEncodedRect(RFBDisplay<?, ?> display, int x, int y, int width, int height, int encodingType)
+			throws IOException {
 		ProtocolEngine engine = display.getEngine();
 		RFBDisplayModel model = display.getDisplayModel();
 		DataInputStream in = engine.getInputStream();
-
 		int subrects = in.readInt();
 		int bytesPerPixel = model.getBitsPerPixel() / 8;
 		byte[] buffer = new byte[bytesPerPixel];
@@ -57,15 +57,12 @@ public class CORREEncoding extends AbstractRawEncoding {
 			g.setColor(pixel);
 			g.fillRect(sx, sy, sw, sh);
 		}
-
 		// Request a repaint
 		display.requestRepaint(display.getContext().getScreenUpdateTimeout(), x, y, width, height);
-
 	}
 
 	@Override
 	public String getName() {
 		return "CORRE";
 	}
-
 }

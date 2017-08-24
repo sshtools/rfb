@@ -11,7 +11,6 @@ import com.sshtools.rfbserver.DisplayDriver;
 import com.sshtools.rfbserver.UpdateRectangle;
 
 public abstract class AbstractDisplayDriver implements DisplayDriver {
-
 	private List<DamageListener> listeners = new ArrayList<DamageListener>();
 	private List<PointerListener> mouseListeners = new ArrayList<PointerListener>();
 	private List<WindowListener> windowListeners = new ArrayList<WindowListener>();
@@ -103,9 +102,9 @@ public abstract class AbstractDisplayDriver implements DisplayDriver {
 		}
 	}
 
-	protected void fireDamageEvent(String name, Rectangle area, boolean important, int preferredEncoding) {
+	protected void fireDamageEvent(String name, Rectangle area, int preferredEncoding) {
 		for (DamageListener l : new ArrayList<DamageListener>(listeners)) {
-			l.damage(name, area, important, preferredEncoding);
+			l.damage(name, area, preferredEncoding);
 		}
 	}
 
@@ -121,7 +120,7 @@ public abstract class AbstractDisplayDriver implements DisplayDriver {
 		}
 	}
 
-	protected void fireScreenBoundsChanged(Rectangle newBounds, boolean clientInitiated) {
+	protected void fireScreenBoundsChanged(ScreenData newBounds, boolean clientInitiated) {
 		for (ScreenBoundsListener l : new ArrayList<ScreenBoundsListener>(screenChangeListeners)) {
 			l.resized(newBounds, clientInitiated);
 		}

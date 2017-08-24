@@ -4,6 +4,7 @@ public interface TightConstants {
 	final static int OP_FILL = 0x08;
 	final static int OP_JPEG = 0x09;
 	final static int OP_PNG  = 0x0A;
+	final static int OP_COPY  = 0x00;
 	
 	final static int OP_READ_FILTER_ID = 0x40;
 	

@@ -19,7 +19,7 @@ import com.sshtools.rfbserver.DisplayDriver.PointerShape;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
 
-public class CursorEncoding extends AbstractRawEncoding implements RFBServerEncoding {
+public class CursorEncoding extends AbstractRawEncoding<PointerShape> {
 	final static Logger LOG = LoggerFactory.getLogger(CursorEncoding.class);
 
 	public CursorEncoding() {
@@ -33,7 +33,7 @@ public class CursorEncoding extends AbstractRawEncoding implements RFBServerEnco
 		return true;
 	}
 
-	public void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
+	public void encode(UpdateRectangle<PointerShape> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
 		LOG.info("Sending default cursor shape update in " + pixelFormat);
 		PointerShape pc = (PointerShape) update.getData();
@@ -70,5 +70,9 @@ public class CursorEncoding extends AbstractRawEncoding implements RFBServerEnco
 		dout.write(pixelData);
 		// And now write the mast
 		dout.write(array2);
+	}
+
+	@Override
+	public void selected(RFBClient client) {
 	}
 }

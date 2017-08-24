@@ -47,6 +47,8 @@ public interface RFBConstants {
 	public final static int CMSG_POINTER_EVENT = 5;
 	public final static int CMSG_CUT_TEXT = 6;
 	public final static int CMSG_SET_DESKTOP_SIZE = 251;
+	public final static int CMSG_ENABLE_CONTINUOUS_UPDATES = 150;
+	
 	// Server messages
 	public final static int SMSG_FRAMEBUFFER_UPDATE = 0;
 	public final static int SMSG_SET_COLORMAP = 1;
@@ -141,6 +143,7 @@ public interface RFBConstants {
 	public static final String ENC_NEW_FB_SIZE_SIG = "NEWFBSIZ";
 	public static final String ENC_JPEG_QUALITY_SIG = "JPEGQLVL";
 	public static final String ENC_EXTENDED_FB_SIZE_SIG = "EXTFBSIZ";
+	public static final String ENC_CONTINUOUS_UPDATES_SIG = "CONTUPD_";
 
 	public static final String NO_AUTH_SIG = "NOAUTH__";
 	public static final String VNC_AUTH_SIG = "VNCAUTH_";
@@ -160,14 +163,15 @@ public interface RFBConstants {
 	public final static int ENC_ZRLE = 16;
 	public final static int ENC_TIGHT_PNG = -260;
 
+	public final static int ENC_CONTINUOUS_UPDATES = -313; // 313
 	public final static int ENC_POINTER_POS = 0xffffff18;
 	public final static int ENC_RICH_CURSOR = 0xffffff11;
 	public final static int ENC_X11_CURSOR = 0xffffff10;
 	public final static int ENC_COMPRESS_LEVEL0 = 0xFFFFFF00;
 	public final static int ENC_JPEG_QUALITY_LEVEL0 = -32;
-	public final static int ENC_LAST_RECT = 0xFFFFFF20;
-	public final static int ENC_NEW_FB_SIZE = 0xFFFFFF21;
-	public final static int ENC_EXTENDED_FB_SIZE = 0xFFFFFECC;
+	public final static int ENC_LAST_RECT = 0xFFFFFF20; // 224
+	public final static int ENC_NEW_FB_SIZE = 0xFFFFFF21; // 223
+	public final static int ENC_EXTENDED_FB_SIZE = 0xFFFFFECC; // 308
 
 	// Caps
 	public static final TightCapability CAP_ENC_RAW = new TightCapability(
@@ -207,6 +211,8 @@ public interface RFBConstants {
 			ENC_JPEG_QUALITY_LEVEL0, RFB_TIGHT_VNC_VENDOR, ENC_JPEG_QUALITY_SIG);
 	public static final TightCapability CAP_ENC_EXTENDED_FB_SIZE = new TightCapability(
 			ENC_EXTENDED_FB_SIZE, RFB_STANDARD_VENDOR, ENC_EXTENDED_FB_SIZE_SIG);
+	public static final TightCapability CAP_ENC_CONTINUOUS_UPDATES = new TightCapability(
+			ENC_CONTINUOUS_UPDATES, RFB_STANDARD_VENDOR, ENC_CONTINUOUS_UPDATES_SIG);
 
 	public static final TightCapability CAP_AUTH_NONE = new TightCapability(
 			SCHEME_NO_AUTHENTICATION, RFB_STANDARD_VENDOR, NO_AUTH_SIG);
@@ -292,6 +298,13 @@ public interface RFBConstants {
 	public final static String CAP_FTLRFRLY_SIG = "FTLRFRLY";
 	public final static TightCapability CAP_FTLRFRLY = new TightCapability(
 			CAP_FTLRFRLY_CODE, RFB_TIGHT_VNC_VENDOR, CAP_FTLRFRLY_SIG);
+	
+	// CUS_EOCU
+	public final static int CAP_CUS_EOCU_CODE = 150;
+	public final static String CAP_CUS_EOCU_SIG = "CUS_EOCU";
+	public final static TightCapability CAP_CUS_EOCU = new TightCapability(
+			CAP_CUS_EOCU_CODE, RFB_STANDARD_VENDOR, CAP_CUS_EOCU_SIG);
+	
 	// C -> S
 	// VDFREEZ
 	public final static int CAP_VDFREEZ_CODE = 0x98;
@@ -358,5 +371,10 @@ public interface RFBConstants {
 	public final static String CAP_FTCDSRST_SIG = "FTCDSRST";
 	public final static TightCapability CAP_FTCDSRST = new TightCapability(
 			CAP_FTCDSRST_CODE, RFB_TIGHT_VNC_VENDOR, CAP_FTCDSRST_SIG);
+	// CUC_ENCU
+	public final static int CAP_CUC_ENCU_CODE = 150;
+	public final static String CAP_CUC_ENCU_SIG = "CUC_ENCU";
+	public final static TightCapability CAP_CUC_ENCU = new TightCapability(
+			CAP_CUC_ENCU_CODE, RFB_STANDARD_VENDOR, CAP_CUC_ENCU_SIG);
 
 }

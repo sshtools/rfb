@@ -24,12 +24,12 @@ public abstract class AbstractRawEncoding implements RFBEncoding {
 		return new Color(ImageUtil.decodeAndUntranslatePixel(b, off, model));
 	}
 
-	protected int doProcessRaw(RFBDisplay display, int x, int y, int width,
+	protected int doProcessRaw(RFBDisplay<?,?> display, int x, int y, int width,
 			int height, byte[] buf) {
 		return doProcessRaw(display, x, y, width, height, buf, 0);
 	}
 
-	protected int doProcessRaw(RFBDisplay display, int x, int y, int width,
+	protected int doProcessRaw(RFBDisplay<?,?> display, int x, int y, int width,
 			int height, byte[] buf, int offset) {
 		RFBDisplayModel model = display.getDisplayModel();
 		// Create a smaller compatible image to draw the rectangle on. This

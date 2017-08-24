@@ -18,7 +18,7 @@ import com.sshtools.rfbcommon.PixelFormat;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
 
-public abstract class AbstractRawEncoding extends AbstractEncoding {
+public abstract class AbstractRawEncoding<D> extends AbstractEncoding<D> {
 
     public static class SubRect {
         public int pixel;

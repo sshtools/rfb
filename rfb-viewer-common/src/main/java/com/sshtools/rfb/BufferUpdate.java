@@ -13,4 +13,9 @@ public class BufferUpdate extends RFBRectangle {
 	public int getEncoding() {
 		return encoding;
 	}
+
+	@Override
+	public String toString() {
+		return "BufferUpdate [encoding=" + encoding + ", x=" + x + ", y=" + y + ", w=" + w + ", h=" + h + "]";
+	}
 }

@@ -16,6 +16,14 @@ public class ScreenDetail {
 		this.flags = flags;
 	}
 
+	public ScreenDetail(ScreenDetail other) {
+		this.id = other.id;
+		this.dimension = new ScreenDimension(other.dimension);
+		this.x = other.x;
+		this.y = other.y;
+		this.flags = other.flags;
+	}
+
 	public long getId() {
 		return id;
 	}

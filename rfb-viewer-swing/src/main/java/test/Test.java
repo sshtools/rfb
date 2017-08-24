@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sshtools.rfb.RFBAuthenticationException;
 import com.sshtools.rfb.RFBContext;
+import com.sshtools.rfb.RFBDisplay;
 import com.sshtools.rfb.RFBEncoding;
 import com.sshtools.rfb.RFBEventHandler;
 import com.sshtools.rfb.RFBTransport;
@@ -35,6 +36,7 @@ public class Test extends JFrame implements RFBEventHandler {
 		super("Remote Desktop");
 		context = new RFBContext();
 		// context.setUseCopyRect(false);
+		context.setScaleMode(RFBDisplay.RESIZE_DESKTOP);
 		context.setJpegQuality(0);
 		// context.setPixelFormat(RFBContext.PIXEL_FORMAT_8_BIT);
 		 context.setPreferredEncoding(RFBConstants.ENC_TIGHT);

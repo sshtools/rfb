@@ -93,7 +93,7 @@ public interface DisplayDriver {
 	}
 
 	public interface ScreenBoundsListener {
-		void resized(Rectangle newBounds, boolean clientInitiated);
+		void resized(ScreenData newBounds, boolean clientInitiated);
 	}
 
 	public interface WindowListener {
@@ -107,7 +107,7 @@ public interface DisplayDriver {
 	}
 
 	public interface DamageListener {
-		void damage(String name, Rectangle rectangle, boolean important, int preferredEncoding);
+		void damage(String name, Rectangle rectangle, int preferredEncoding);
 	}
 
 	public interface PointerListener {

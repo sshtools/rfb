@@ -185,14 +185,9 @@ public class ImageUtil {
 	}
 
 	public static int translate(int rawColor, PixelFormat rfbModel) {
-		return (255
-				* (rawColor >> rfbModel.getRedShift() & rfbModel.getRedMax())
-				/ rfbModel.getRedMax() << 16)
-				| (255
-						* (rawColor >> rfbModel.getGreenShift() & rfbModel
-								.getGreenMax()) / rfbModel.getGreenMax() << 8)
-				| (255 * (rawColor >> rfbModel.getBlueShift() & rfbModel
-						.getBlueMax()) / rfbModel.getBlueMax());
+		return (255	* (rawColor >> rfbModel.getRedShift() & rfbModel.getRedMax()) / rfbModel.getRedMax() << 16)	| 
+			   (255 * (rawColor >> rfbModel.getGreenShift() & rfbModel.getGreenMax()) / rfbModel.getGreenMax() << 8) |
+			   (255 * (rawColor >> rfbModel.getBlueShift() & rfbModel.getBlueMax()) / rfbModel.getBlueMax());
 	}
 
 	public static int decodeAndUntranslatePixel(byte[] b, int off,

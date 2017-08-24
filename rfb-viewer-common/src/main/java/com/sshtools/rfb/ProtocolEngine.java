@@ -2,6 +2,7 @@
  */
 package com.sshtools.rfb;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sshtools.rfb.RFBToolkit.RFBImage;
+import com.sshtools.rfb.encoding.ExtendedDesktopSizeEncoding;
 import com.sshtools.rfb.files.TightVNCFS;
 import com.sshtools.rfb.files.UltraVNCFS;
 import com.sshtools.rfbcommon.ProtocolReader;
@@ -20,17 +22,17 @@ import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbcommon.RFBConstants;
 import com.sshtools.rfbcommon.RFBVersion;
 import com.sshtools.rfbcommon.ScreenData;
+import com.sshtools.rfbcommon.ScreenDetail;
+import com.sshtools.rfbcommon.ScreenDimension;
 
 public class ProtocolEngine implements Runnable {
 	final static Logger LOG = LoggerFactory.getLogger(ProtocolEngine.class);
 	protected static final int VNCR_FRAMEBUFFER_UPDATE = 1;
-
 	final static int BUFFER_SIZE = 65536;
-
 	private RFBImage emptyCursor, dotCursor;
 	private RFBImage localCursorImage;
 	private char[] initialPassword;
-	private RFBDisplay display;
+	private RFBDisplay<?, ?> display;
 	private RFBEncoding currentEncoding;
 	private RFBTransport transport;
 	private RFBEventHandler prompt;
@@ -51,7 +53,7 @@ public class ProtocolEngine implements Runnable {
 	private MonitorDataInputStream monitor;
 	private RFBImage stopCursor;
 	private int cursorX, cursorY;
-	private boolean requestedFullUpdate;
+	private boolean requestFullUpdate;
 	private RFBFS fileSystem;
 	private ProtocolReader in;
 	private ProtocolWriter out;
@@ -59,11 +61,10 @@ public class ProtocolEngine implements Runnable {
 	// private int selectedTunnelType;
 	private SecurityType securityType;
 	private List<SecurityType> securityTypes = new ArrayList<SecurityType>();
-	private RFBVersion clientProtocolVersion = new RFBVersion(
-			System.getProperty("rfb.version", RFBDisplay.VERSION_STRING));
+	private RFBVersion clientProtocolVersion = new RFBVersion(System.getProperty("rfb.version", RFBDisplay.VERSION_STRING));
 	private SecurityTypeFactory securityTypeFactory;
 
-	public ProtocolEngine(RFBDisplay display, RFBTransport transport, RFBContext context, RFBEventHandler prompt,
+	public ProtocolEngine(RFBDisplay<?, ?> display, RFBTransport transport, RFBContext context, RFBEventHandler prompt,
 			RFBDisplayModel displayModel, RFBImage emptyCursor, RFBImage dotCursor) {
 		this.context = context;
 		this.transport = transport;
@@ -72,7 +73,6 @@ public class ProtocolEngine implements Runnable {
 		this.displayModel = displayModel;
 		this.emptyCursor = emptyCursor;
 		this.dotCursor = dotCursor;
-
 		securityTypeFactory = new DefaultSecurityTypeFactory();
 	}
 
@@ -112,7 +112,7 @@ public class ProtocolEngine implements Runnable {
 		return fileSystem;
 	}
 
-	public RFBDisplay getDisplay() {
+	public RFBDisplay<?, ?> getDisplay() {
 		return display;
 	}
 
@@ -135,10 +135,8 @@ public class ProtocolEngine implements Runnable {
 	/**
 	 * Set the maximum client protocol version to use.
 	 * 
-	 * @param major
-	 *            major version
-	 * @param minor
-	 *            minor version
+	 * @param major major version
+	 * @param minor minor version
 	 */
 	public void setClientProtocolVersion(int major, int minor) {
 		clientProtocolVersion.set(major, minor);
@@ -192,8 +190,8 @@ public class ProtocolEngine implements Runnable {
 			in.readFully(description);
 			throw new IOException(new String(description));
 		default:
-			throw new IOException("The server reported an invalid authentication scheme! " + "scheme="
-					+ String.valueOf(securityTypeCode));
+			throw new IOException(
+					"The server reported an invalid authentication scheme! " + "scheme=" + String.valueOf(securityTypeCode));
 		}
 		return securityTypeFactory.getSecurityType(securityTypeCode);
 	}
@@ -214,13 +212,35 @@ public class ProtocolEngine implements Runnable {
 		processServerInitialization();
 		setPixelFormat();
 		setEncodings(context.getEncodings());
+		
 		displayModel.updateBuffer();
-
 		for (RFBFS fs : new RFBFS[] { new TightVNCFS(this), new UltraVNCFS(this) }) {
 			if (fs.isActive()) {
 				fileSystem = fs;
 				LOG.info("Chosen " + fs + " as for file transfer");
 				break;
+			}
+		}
+	}
+
+	@SuppressWarnings("resource")
+	public void enableContinuousUpdates() throws IOException {
+		if (!context.isContinuousUpdatesSupported())
+			throw new UnsupportedOperationException();
+		
+		if (context.isContinuousUpdates()) {
+			LOG.info("Enabling continuous updates");
+			context.setContinuousUpdates(true);
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			ProtocolWriter paw = new ProtocolWriter(bout);
+			paw.writeByte(RFBConstants.CMSG_ENABLE_CONTINUOUS_UPDATES);
+			paw.writeByte(1);
+			paw.writeShort(0);
+			paw.writeShort(0);
+			paw.writeShort(displayModel.getScreenData().getWidth());
+			paw.writeShort(displayModel.getScreenData().getHeight());
+			synchronized (out) {
+				out.write(bout.toByteArray());
 			}
 		}
 	}
@@ -233,6 +253,10 @@ public class ProtocolEngine implements Runnable {
 	 * @throws IOException
 	 */
 	void setEncodings(int[] encs) throws IOException {
+		LOG.info("Chosen encodings :-");
+		for(int i : encs) {
+			LOG.info(String.format("    %s [%d]", context.getEncoding(i).getName(), i));
+		}
 		byte[] msg = new byte[4 + (4 * encs.length)];
 		msg[0] = (byte) RFBConstants.CMSG_SET_ENCODINGS;
 		msg[2] = (byte) ((encs.length >> 8) & 0xfF);
@@ -252,8 +276,8 @@ public class ProtocolEngine implements Runnable {
 	 * @throws IOException
 	 */
 	void processServerInitialization() throws IOException {
-		displayModel.setRfbWidth(in.readUnsignedShort());
-		displayModel.setRfbHeight(in.readUnsignedShort());
+		displayModel.changeFramebufferSize(ExtendedDesktopSizeEncoding.SERVER_SIDE_CHANGE,
+				new ScreenData(new ScreenDimension(in.readUnsignedShort(), in.readUnsignedShort())));
 		// Pixel format
 		displayModel.setBitsPerPixel(in.readUnsignedByte());
 		displayModel.setColorDepth(in.readUnsignedByte());
@@ -272,20 +296,26 @@ public class ProtocolEngine implements Runnable {
 		byte[] tmp = new byte[len];
 		in.readFully(tmp);
 		displayModel.setRfbName(new String(tmp));
-
 		LOG.info("Server's initial pixel format: " + displayModel);
-
 		isProcessingEvents = true;
-		if (displayModel.getRfbName().equalsIgnoreCase("libvncserver")
-				&& context.getPreferredEncoding() == RFBContext.ENCODING_ZLIB) {
-			System.out
-					.println("WARNING: Enabling LibVNCServer / Zlib workaround, changing preferred encoding to Tight");
-			context.setPreferredEncoding(RFBContext.ENCODING_TIGHT);
+		if (displayModel.getRfbName().equalsIgnoreCase("libvncserver") && context.getPreferredEncoding() == RFBConstants.ENC_ZLIB) {
+			// TODO is this still required
+			System.out.println("WARNING: Enabling LibVNCServer / Zlib workaround, changing preferred encoding to Tight");
+			context.setPreferredEncoding(RFBConstants.ENC_TIGHT);
 		}
-
 		for (SecurityType t : securityTypes) {
 			t.postServerInitialisation(this);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getSecurityType(Class<T> clazz) {
+		for (SecurityType t : getSecurityTypes()) {
+			if (clazz.isAssignableFrom(t.getClass())) {
+				return (T) t;
+			}
+		}
+		return null;
 	}
 
 	public void setPixelFormat() throws IOException {
@@ -378,8 +408,8 @@ public class ProtocolEngine implements Runnable {
 	 * @param blueShift
 	 * @throws IOException
 	 */
-	void changePixelFormat(int bitsPerPixel, int colorDepth, boolean isBigEndian, boolean isTrueColor, int redMax,
-			int greenMax, int blueMax, int redShift, int greenShift, int blueShift) throws IOException {
+	void changePixelFormat(int bitsPerPixel, int colorDepth, boolean isBigEndian, boolean isTrueColor, int redMax, int greenMax,
+			int blueMax, int redShift, int greenShift, int blueShift) throws IOException {
 		displayModel.setBitsPerPixel(bitsPerPixel);
 		displayModel.setColorDepth(colorDepth);
 		displayModel.setBigEndian(isBigEndian);
@@ -432,20 +462,16 @@ public class ProtocolEngine implements Runnable {
 			// Handshake versions
 			determineVersion();
 			version = sendVersion();
-
 			// Authenticate
 			authenticate();
-
 			// Negotiate session
 			initializeProtocol();
-
 			// Notify display of new state
 			this.display.resizeComponent();
 			prompt.connected();
 			prompt.resized(displayModel.getRfbWidth(), displayModel.getRfbHeight());
-
 			// Start protocol thread
-			requestedFullUpdate = true;
+			requestFullUpdate = true;
 			new Thread(this).start();
 		} catch (IOException ioe) {
 			if (!isDisconnecting)
@@ -458,9 +484,9 @@ public class ProtocolEngine implements Runnable {
 	public void run() {
 		try {
 			while (true) { // rely on the IOException to break out
-				if (requestedFullUpdate) {
+				if (requestFullUpdate) {
 					requestFramebufferUpdate(0, 0, displayModel.getRfbWidth(), displayModel.getRfbHeight(), false);
-					requestedFullUpdate = false;
+					requestFullUpdate = false;
 				}
 				int type = in.readUnsignedByte();
 				switch (type) {
@@ -470,7 +496,6 @@ public class ProtocolEngine implements Runnable {
 					// ?
 					in.read(); // ?
 					numUpdates = in.readUnsignedShort();
-
 					boolean cursorPosReceived = false;
 					BufferUpdate rect;
 					RFBEncoding encoding;
@@ -488,24 +513,24 @@ public class ProtocolEngine implements Runnable {
 								if (LOG.isDebugEnabled()) {
 									LOG.debug("Encoding: " + encoding);
 								}
-								if ((currentEncoding == null || currentEncoding != encoding)
-										&& !encoding.isPseudoEncoding()) {
+								if ((currentEncoding == null || currentEncoding != encoding) && !encoding.isPseudoEncoding()) {
 									currentEncoding = encoding;
 									prompt.encodingChanged(currentEncoding);
 								}
-								encoding.processEncodedRect(display, rect.getX(), rect.getY(), rect.getWidth(),
-										rect.getHeight(), rect.getEncoding());
+								encoding.processEncodedRect(display, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(),
+										rect.getEncoding());
 								if (monitor != null) {
 									monitor.setMonitoring(false);
 								}
-								if (rect.getEncoding() == RFBContext.MASK_ENCODING_POINTERPOS
-										|| rect.getEncoding() == RFBContext.MASK_ENCODING_XCURSOR
-										|| rect.getEncoding() == RFBContext.MASK_ENCODING_RICHCURSOR) {
+								if (rect.getEncoding() == RFBConstants.ENC_POINTER_POS
+										|| rect.getEncoding() == RFBConstants.ENC_X11_CURSOR
+										|| rect.getEncoding() == RFBConstants.ENC_RICH_CURSOR) {
 									cursorPosReceived = true;
 									continue;
 								}
-								if (rect.getEncoding() == RFBContext.MASK_ENCODING_LAST_RECT
-										|| rect.getEncoding() == RFBContext.MASK_ENCODING_NEW_SIZE)
+								if (rect.getEncoding() == RFBConstants.ENC_LAST_RECT
+										|| rect.getEncoding() == RFBConstants.ENC_NEW_FB_SIZE
+										|| rect.getEncoding() == RFBConstants.ENC_EXTENDED_FB_SIZE)
 									break;
 							} else {
 								LOG.warn(String.format("Unknown encoding %s", rect.getEncoding()));
@@ -534,8 +559,10 @@ public class ProtocolEngine implements Runnable {
 					if (monitor != null && adapt()) {
 						fullUpdateNeeded = true;
 					}
-					requestFramebufferUpdate(0, 0, displayModel.getRfbWidth(), displayModel.getRfbHeight(),
-							!fullUpdateNeeded);
+					
+					if(!context.isContinuousUpdates() || fullUpdateNeeded) 
+						requestFramebufferUpdate(0, 0, displayModel.getRfbWidth(), displayModel.getRfbHeight(), !fullUpdateNeeded);
+					
 					break;
 				case RFBConstants.SMSG_SET_COLORMAP:
 					readColourMap();
@@ -596,8 +623,8 @@ public class ProtocolEngine implements Runnable {
 			int r = displayModel.getColorDepth() == 16 ? in.readShort() : (in.readShort() >> 8) & 0x000000ff;
 			int g = displayModel.getColorDepth() == 16 ? in.readShort() : (in.readShort() >> 8) & 0x000000ff;
 			int b = displayModel.getColorDepth() == 16 ? in.readShort() : (in.readShort() >> 8) & 0x000000ff;
-			LOG.info(String.format("Map %d to %s %s %s", i, Integer.toHexString(r), Integer.toHexString(g),
-					Integer.toHexString(b)));
+			LOG.info(
+					String.format("Map %d to %s %s %s", i, Integer.toHexString(r), Integer.toHexString(g), Integer.toHexString(b)));
 			displayModel.getColorMap().put(i, r << 16 | g << 8 | b);
 		}
 	}
@@ -615,9 +642,7 @@ public class ProtocolEngine implements Runnable {
 			} else if (result == 1) {
 				// TODO does this mean a loop?
 				// state_ = RFBSTATE_SECURITY_RESULT;
-
-				if (version.compareTo(RFBVersion.VERSION_3_8) < 0
-						&& type.getType() == RFBConstants.SCHEME_NO_AUTHENTICATION) {
+				if (version.compareTo(RFBVersion.VERSION_3_8) < 0 && type.getType() == RFBConstants.SCHEME_NO_AUTHENTICATION) {
 					LOG.info("Legacy authentication, completing OK now.");
 					result = RFBConstants.AUTHENTICATION_OK;
 				} else {
@@ -655,7 +680,6 @@ public class ProtocolEngine implements Runnable {
 		LOG.error("Authentication error. " + authenticationError);
 		throw new RFBAuthenticationException(authenticationError);
 	}
-
 	// private int XXhandleAuth(int authScheme, boolean sendResult)
 	// throws IOException, AuthenticationException {
 	// try {
@@ -744,7 +768,6 @@ public class ProtocolEngine implements Runnable {
 	// + String.valueOf(authResult);
 	// }
 	// }
-
 	private String getAuthenticationError() throws IOException {
 		if (version.compareTo(RFBVersion.VERSION_3_8) >= 0) {
 			int len = in.readInt();
@@ -781,15 +804,11 @@ public class ProtocolEngine implements Runnable {
 	// }
 	// return authScheme;
 	// }
-
 	public SecurityType negotiateType() throws IOException {
 		LOG.info("Negotiating security types");
-
 		// TODO
 		// Not sure if this is right
-		List<Integer> validSubAuths = securityType == null ? null
-				: securityTypes.get(securityTypes.size() - 1).getSubAuthTypes();
-
+		List<Integer> validSubAuths = securityType == null ? null : securityTypes.get(securityTypes.size() - 1).getSubAuthTypes();
 		int newSecurityTypeCode = 0;
 		int securityTypes = in.readUnsignedByte();
 		if (securityTypes == 0) {
@@ -826,9 +845,6 @@ public class ProtocolEngine implements Runnable {
 		}
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isProcessingEvents() {
 		return isProcessingEvents;
 	}
@@ -851,9 +867,32 @@ public class ProtocolEngine implements Runnable {
 			out.write(msg);
 		}
 	}
-	
-	public void sendExtendedScreenData(ScreenData screenData) {
-		
+
+	public void setDesktopSize(ScreenData screenData) throws IOException {
+		if (!context.isUseExtendedDesktopSize()) {
+			throw new IOException("Extended desktop size is not a supported encoding.");
+		}
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		@SuppressWarnings("resource")
+		ProtocolWriter paw = new ProtocolWriter(bout);
+		paw.writeByte(RFBConstants.CMSG_SET_DESKTOP_SIZE);
+		paw.writeByte(0);
+		paw.writeByte(0);
+		paw.writeShort(screenData.getWidth());
+		paw.writeShort(screenData.getHeight());
+		List<ScreenDetail> a = screenData.getAllDetails();
+		paw.writeByte(a.size());
+		for (ScreenDetail d : a) {
+			paw.writeUInt32(d.getId());
+			paw.writeShort(d.getX());
+			paw.writeShort(d.getY());
+			paw.writeShort(d.getDimension().getWidth());
+			paw.writeShort(d.getDimension().getHeight());
+			paw.writeUInt32(d.getFlags());
+		}
+		synchronized (out) {
+			out.write(bout.toByteArray());
+		}
 	}
 
 	public void sendPointerEvent(int modifiers, int x, int y) throws IOException {
@@ -980,8 +1019,7 @@ public class ProtocolEngine implements Runnable {
 	}
 
 	/**
-	 * @param inputEnabled
-	 *            The inputEnabled to set.
+	 * @param inputEnabled The inputEnabled to set.
 	 */
 	public void setInputEnabled(boolean inputEnabled) {
 		if (inputEnabled != this.inputEnabled) {
@@ -1070,24 +1108,21 @@ public class ProtocolEngine implements Runnable {
 	}
 
 	/**
-	 * @param in
-	 *            The inputStream to set.
+	 * @param in The inputStream to set.
 	 */
 	public void setInputStream(ProtocolReader in) {
 		this.in = in;
 	}
 
 	/**
-	 * @param out
-	 *            The outputStream to set.
+	 * @param out The outputStream to set.
 	 */
 	public void setOutputStream(OutputStream out) {
 		this.out = out instanceof ProtocolWriter ? (ProtocolWriter) out : new ProtocolWriter(out);
 	}
 
 	private void setLocalCursorImpl(RFBImage img, int hotX, int hotY) {
-		if ((localCursorImage == null && img != null) || (img == null && localCursorImage != null)
-				|| (img != localCursorImage)) {
+		if ((localCursorImage == null && img != null) || (img == null && localCursorImage != null) || (img != localCursorImage)) {
 			localCursorImage = img;
 			try {
 				if (localCursorImage != null) {
@@ -1117,9 +1152,9 @@ public class ProtocolEngine implements Runnable {
 		long speed = monitor.getSpeed();
 		RFBEncoding newEncoding = currentEncoding;
 		if (speed > 3128) {
-			newEncoding = context.getEncoding(RFBContext.ENCODING_HEXTILE);
+			newEncoding = context.getEncoding(RFBConstants.ENC_HEXTILE);
 		} else if (speed < 1496) {
-			newEncoding = context.getEncoding(RFBContext.ENCODING_TIGHT);
+			newEncoding = context.getEncoding(RFBConstants.ENC_TIGHT);
 		}
 		if (context.getPreferredEncoding() != newEncoding.getType()) {
 			context.setPreferredEncoding(newEncoding.getType());
@@ -1178,7 +1213,7 @@ public class ProtocolEngine implements Runnable {
 		ros.writeInt(displayModel.getRfbWidth());
 		ros.writeInt(displayModel.getRfbHeight());
 		ros.writeByte(displayModel.getBytesPerPixel());
-		requestedFullUpdate = true;
+		requestFullUpdate = true;
 		recordingOutputStream = ros;
 	}
 
@@ -1192,5 +1227,4 @@ public class ProtocolEngine implements Runnable {
 	public ProtocolWriter getOutputStream() {
 		return out;
 	}
-
 }

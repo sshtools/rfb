@@ -8,7 +8,6 @@ import com.sshtools.rfb.RFBDisplay;
 import com.sshtools.rfb.RFBDisplayModel;
 
 public class RawEncoding extends AbstractRawEncoding {
-
 	public RawEncoding() {
 	}
 
@@ -23,7 +22,8 @@ public class RawEncoding extends AbstractRawEncoding {
 	}
 
 	@Override
-	public void processEncodedRect(RFBDisplay display, int x, int y, int width, int height, int encodingType) throws IOException {
+	public void processEncodedRect(RFBDisplay<?, ?> display, int x, int y, int width, int height, int encodingType)
+			throws IOException {
 		ProtocolEngine engine = display.getEngine();
 		RFBDisplayModel model = display.getDisplayModel();
 		DataInputStream in = engine.getInputStream();

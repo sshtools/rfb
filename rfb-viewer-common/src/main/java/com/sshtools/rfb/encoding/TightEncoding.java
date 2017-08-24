@@ -7,7 +7,6 @@ import java.util.zip.Inflater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sshtools.rfb.ProtocolEngine;
 import com.sshtools.rfb.RFBDisplay;
 import com.sshtools.rfb.RFBDisplayModel;
 import com.sshtools.rfb.RFBToolkit;
@@ -21,7 +20,7 @@ import com.sshtools.rfbcommon.TightConstants;
 import com.sshtools.rfbcommon.TightUtil;
 
 public class TightEncoding extends AbstractRawEncoding implements TightConstants {
-	final static Logger LOG = LoggerFactory.getLogger(ProtocolEngine.class);
+	final static Logger LOG = LoggerFactory.getLogger(TightEncoding.class);
 	private final static int NO_OF_INFLATERS = 4;
 	private final static int MASK_FILTER = 0x40;
 	private final static int MASK_STREAM = 0x30;
@@ -29,7 +28,7 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 	private Inflater[] zlibInflaters = new Inflater[NO_OF_INFLATERS];
 	private RFBDisplayModel rfbModel;
 	private int streamId;
-	private RFBDisplay display;
+	private RFBDisplay<?, ?> display;
 	private byte[] buffer;
 	private int[] palette24 = new int[256];
 	private int numberOfColors;
@@ -46,7 +45,8 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 	}
 
 	@Override
-	public void processEncodedRect(RFBDisplay display, int x, int y, int width, int height, int encodingType) throws IOException {
+	public void processEncodedRect(RFBDisplay<?, ?> display, int x, int y, int width, int height, int encodingType)
+			throws IOException {
 		this.display = display;
 		input = display.getEngine().getInputStream();
 		rfbModel = display.getDisplayModel();
@@ -83,8 +83,8 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 	}
 
 	protected void doTight(int x, int y, int width, int height, int op) throws IOException {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Tight " + x + "," + y + "," + width + "," + height);
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Tight " + x + "," + y + "," + width + "," + height);
 		}
 		// Reset variables and extract stream ID for compression (if any)
 		streamId = (op & MASK_STREAM) >> 4;
@@ -97,8 +97,8 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 		synchronized (rfbModel.getLock()) {
 			switch (filter) {
 			case OP_FILTER_RAW:
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Raw");
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Raw");
 				}
 				buffer = readTight(pixSize * width * height);
 				if (tightNative) {
@@ -109,8 +109,8 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 				break;
 			case OP_FILTER_PALETTE:
 				numberOfColors = input.readUnsignedByte() + 1;
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Palette of " + numberOfColors);
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Palette of " + numberOfColors);
 				}
 				for (int i = 0; i < numberOfColors; ++i) {
 					palette24[i] = readTightColor();
@@ -128,8 +128,8 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 				}
 				break;
 			case OP_FILTER_GRADIENT:
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Gradient");
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Gradient");
 				}
 				buffer = readTight(pixSize * width * height);
 				decodeGradientData(x, y, width, height, buffer);
@@ -151,16 +151,16 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 		byte[] imageData = new byte[readCompactLen];
 		input.readFully(imageData);
 		RFBImage image = RFBToolkit.get().createImage(imageData);
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("JPEG " + x + "," + y + "," + image.getWidth() + "," + image.getHeight());
+		if (LOG.isInfoEnabled()) {
+			LOG.info("JPEG " + x + "," + y + "," + image.getWidth() + "," + image.getHeight());
 		}
 		rfbModel.drawRectangle(x, y, image.getWidth(), image.getHeight(), image);
 	}
 
 	private void doFill(final int x, final int y, final int width, final int height) throws IOException {
 		final RFBColor color = RFBToolkit.get().newColor().setRGB(readTightColor());
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Fill " + x + "," + y + "," + width + "," + height + " with " + color);
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Fill " + x + "," + y + "," + width + "," + height + " with " + color);
 		}
 		RFBToolkit.get().run(new Runnable() {
 			@Override
@@ -174,15 +174,15 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 
 	private byte[] readTight(int len) throws IOException {
 		if (len < RFBConstants.TIGHT_MIN_BYTES_TO_COMPRESS) {
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("Uncompress " + len + " bytes");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Uncompress " + len + " bytes");
 			}
 			byte[] buffer = new byte[len];
 			input.readFully(buffer);
 			return buffer;
 		} else {
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("Compressed " + len + " bytes");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Compressed " + len + " bytes");
 			}
 			return readZlib(len);
 		}
@@ -199,8 +199,8 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 		decoder.setInput(buffer, len, raw);
 		try {
 			decoder.inflate(buffer, 0, len);
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("Decompressed from " + raw + " to " + len);
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Decompressed from " + raw + " to " + len);
 			}
 		} catch (DataFormatException e) {
 			throw new IOException(e);
@@ -243,10 +243,11 @@ public class TightEncoding extends AbstractRawEncoding implements TightConstants
 		int rowBytes = (w + 7) / 8;
 		byte b;
 		for (dy = 0; dy < h; dy++) {
+			i = x;
 			for (dx = 0; dx < w / 8; dx++) {
 				b = src[dy * rowBytes + dx];
 				for (n = 7; n >= 0; n--) {
-					rfbModel.getImageBuffer().setRGB(dx + x, dy + y, palette[b >> n & 1]);
+					rfbModel.getImageBuffer().setRGB(i++, dy + y, palette[b >> n & 1]);
 				}
 			}
 			i = x;

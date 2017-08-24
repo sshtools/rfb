@@ -28,14 +28,14 @@ public class TightEncoding extends AbstractTightEncoding {
 	@SuppressWarnings("unchecked")
 	protected void writeTightBasic(UpdateRectangle<?> update, ProtocolWriter odout, PixelFormat pixelFormat, ProtocolWriter writer,
 			int[] tileBuf) throws IOException {
-		// TODO no gradient filter yet
+		// TODO no gradient filter yet (dont use gradient anyway with jpeg)
 		Rectangle area = update.getArea();
-		odout.writeByte(OP_READ_FILTER_ID);
 		boolean compress = true;
 		int palSize = pan.getSize();
 		ByteArrayOutputStream tmp = new ByteArrayOutputStream();
 		ProtocolWriter dout = new ProtocolWriter(tmp);
 		if (palSize <= 256) {
+			odout.writeByte(OP_READ_FILTER_ID);
 			odout.write(OP_FILTER_PALETTE);
 			odout.writeByte(palSize - 1);
 			for (int i = 0; i < palSize; i++)
@@ -71,7 +71,7 @@ public class TightEncoding extends AbstractTightEncoding {
 
 	protected boolean writeTightRaw(UpdateRectangle<BufferedImage> update, ProtocolWriter dout, PixelFormat pixelFormat,
 			DataOutputStream tmpDout, int[] tileBuf) throws IOException {
-		dout.write(OP_FILTER_RAW);
+		dout.writeByte(OP_COPY);
 		if (TightUtil.isTightNative(pixelFormat)) {
 			for (int i : tileBuf) {
 				TightUtil.writeTightColor(i, pixelFormat, tmpDout);

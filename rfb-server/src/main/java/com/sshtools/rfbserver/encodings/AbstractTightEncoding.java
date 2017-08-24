@@ -18,7 +18,7 @@ import com.sshtools.rfbserver.UpdateRectangle;
 public abstract class AbstractTightEncoding extends AbstractZLIBEncoding implements TightConstants {
 	final static Logger LOG = LoggerFactory.getLogger(AbstractTightEncoding.class);
 	protected int tightLevel = -1;
-	protected PaletteAnalyser pan; 
+	protected PaletteAnalyser pan;
 	public final static int JPEG_THRESHOLD = 256 * 256;
 
 	public AbstractTightEncoding() {
@@ -29,10 +29,9 @@ public abstract class AbstractTightEncoding extends AbstractZLIBEncoding impleme
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
+	public void encode(UpdateRectangle<BufferedImage> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
-		BufferedImage img = ((UpdateRectangle<BufferedImage>) update).getData();
+		BufferedImage img = update.getData();
 		dout.writeInt(getType().getCode());
 		// https://wiki.qemu.org/Features/VNC_Tight_PNG
 		// https://vncdotool.readthedocs.io/en/0.8.0/rfbproto.html#tight-encoding

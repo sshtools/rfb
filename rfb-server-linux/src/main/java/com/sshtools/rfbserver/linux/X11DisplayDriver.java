@@ -371,7 +371,7 @@ public class X11DisplayDriver extends RobotDisplayDriver {
 						xwa.height);
 				bounds.put(xme.window, area3);
 				fireWindowCreated(getWindowName(xme.window), area3);
-				fireDamageEvent("", area3, false, -1);
+				fireDamageEvent("", area3, -1);
 				break;
 			case X11.CreateNotify:
 				X11.XCreateWindowEvent xcwe = (X11.XCreateWindowEvent) e
@@ -398,7 +398,7 @@ public class X11DisplayDriver extends RobotDisplayDriver {
 					} catch (InterruptedException e1) {
 					}
 					fireWindowClosed("", area2);
-					fireDamageEvent("", area2, true, -1);
+					fireDamageEvent("", area2, -1);
 				}
 				break;
 			case X11.ConfigureNotify:
@@ -458,7 +458,7 @@ public class X11DisplayDriver extends RobotDisplayDriver {
 									LOG.trace("Real damage at " + area
 											+ " from window " + wn);
 								}
-								fireDamageEvent(wn, area, false, -1);
+								fireDamageEvent(wn, area, -1);
 							}
 						}
 					}

@@ -192,13 +192,13 @@ public class Win32DisplayDriver extends RobotDisplayDriver {
 		Window window = windows.remove((Integer) hwnd.toNative());
 		LOG.info("Destroyed window " + window.name);
 		fireWindowClosed("", window.bounds);
-		fireDamageEvent("", window.bounds, true, -1);
+		fireDamageEvent("", window.bounds, -1);
 	}
 
 	private void windowCreate(HWND hwnd) {
 		Window window = addWindow(hwnd);
 		fireWindowCreated(getWindowName(hwnd), window.bounds);
-		fireDamageEvent("", window.bounds, false, -1);
+		fireDamageEvent("", window.bounds, -1);
 	}
 
 	private Window addWindow(HWND hwnd) {

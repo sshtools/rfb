@@ -27,8 +27,8 @@ public class RREEncoding implements RFBEncoding {
 	}
 
 	@Override
-	public void processEncodedRect(RFBDisplay display, int x, int y, int width,
-			int height, int encodingType) throws IOException {
+	public void processEncodedRect(RFBDisplay<?, ?> display, int x, int y, int width, int height, int encodingType)
+			throws IOException {
 		ProtocolEngine engine = display.getEngine();
 		RFBDisplayModel model = display.getDisplayModel();
 		DataInputStream in = engine.getInputStream();
@@ -39,11 +39,10 @@ public class RREEncoding implements RFBEncoding {
 		if (model.getBitsPerPixel() == RFBDisplay.COLOR_8BIT) {
 			pixel.setRGB(model.getColorMap().get(bg_buf[0] & 0xFF));
 		} else {
-			pixel.setRGB(bg_buf[2] & 0xFF, bg_buf[1] & 0xFF,
-				bg_buf[0] & 0xFF);
+			pixel.setRGB(bg_buf[2] & 0xFF, bg_buf[1] & 0xFF, bg_buf[0] & 0xFF);
 		}
 		RFBGraphicsContext g = model.getGraphicBuffer();
-		if(g == null) {
+		if (g == null) {
 			return;
 		}
 		g.setColor(pixel);
@@ -57,8 +56,7 @@ public class RREEncoding implements RFBEncoding {
 				pixel.setRGB(model.getColorMap().get(ds.readUnsignedByte()));
 			} else {
 				ds.skip(4);
-				pixel.setRGB(buf[j * 12 + 2] & 0xFF,
-					buf[j * 12 + 1] & 0xFF, buf[j * 12] & 0xFF);
+				pixel.setRGB(buf[j * 12 + 2] & 0xFF, buf[j * 12 + 1] & 0xFF, buf[j * 12] & 0xFF);
 			}
 			sx = x + ds.readUnsignedShort();
 			sy = y + ds.readUnsignedShort();
@@ -67,15 +65,9 @@ public class RREEncoding implements RFBEncoding {
 			g.setColor(pixel);
 			g.fillRect(sx, sy, sw, sh);
 		}
-		display.requestRepaint(display.getContext().getScreenUpdateTimeout(),
-			x, y, width, height);
+		display.requestRepaint(display.getContext().getScreenUpdateTimeout(), x, y, width, height);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.sshtools.rfb.RFBEncoding#getName()
-	 */
 	@Override
 	public String getName() {
 		return "RRE";

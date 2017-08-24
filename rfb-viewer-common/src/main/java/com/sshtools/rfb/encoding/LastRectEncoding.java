@@ -21,8 +21,8 @@ public class LastRectEncoding implements RFBEncoding {
 	}
 
 	@Override
-	public void processEncodedRect(RFBDisplay display, int x, int y, int width,
-			int height, int encodingType) throws IOException {
+	public void processEncodedRect(RFBDisplay<?, ?> display, int x, int y, int width, int height, int encodingType)
+			throws IOException {
 		display.getDisplayModel().drawRectangle(x, y, width, height, null);
 	}
 
@@ -30,5 +30,4 @@ public class LastRectEncoding implements RFBEncoding {
 	public String getName() {
 		return "Last Rectangle";
 	}
-
 }

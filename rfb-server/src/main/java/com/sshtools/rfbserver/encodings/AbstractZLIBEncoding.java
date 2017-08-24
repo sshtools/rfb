@@ -13,7 +13,7 @@ import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
 
-public abstract class AbstractZLIBEncoding extends AbstractRawEncoding {
+public abstract class AbstractZLIBEncoding extends AbstractRawEncoding<BufferedImage> {
 	private int zlibCompressLevel = 5;
 	private ZStream deflater;
 
@@ -32,8 +32,8 @@ public abstract class AbstractZLIBEncoding extends AbstractRawEncoding {
 		return false;
 	}
 
-	public synchronized void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
-			throws IOException {
+	public synchronized void encode(UpdateRectangle<BufferedImage> update, ProtocolWriter dout, PixelFormat pixelFormat,
+			RFBClient client) throws IOException {
 		boolean useJZLib = true;
 		if (useJZLib) {
 			jzlibEncode(update, dout, pixelFormat, client);

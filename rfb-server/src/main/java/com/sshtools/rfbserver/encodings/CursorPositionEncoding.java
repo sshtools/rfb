@@ -12,9 +12,8 @@ import com.sshtools.rfbcommon.TightCapability;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
 
-public class CursorPositionEncoding extends AbstractEncoding {
+public class CursorPositionEncoding extends AbstractEncoding<Void> {
 	final static Logger LOG = LoggerFactory.getLogger(CursorPositionEncoding.class);
-
 
 	public CursorPositionEncoding() {
 	}
@@ -27,7 +26,7 @@ public class CursorPositionEncoding extends AbstractEncoding {
 		return true;
 	}
 
-	public void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
+	public void encode(UpdateRectangle<Void> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Send cursor position " + update.getArea().x + "," + update.getArea().y);

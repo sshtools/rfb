@@ -8,6 +8,7 @@ import java.util.zip.Inflater;
 import com.sshtools.rfb.ProtocolEngine;
 import com.sshtools.rfb.RFBDisplay;
 import com.sshtools.rfb.RFBDisplayModel;
+import com.sshtools.rfbcommon.RFBConstants;
 
 public class ZLIBEncoding extends AbstractRawEncoding {
 	private Inflater inflater;
@@ -19,7 +20,7 @@ public class ZLIBEncoding extends AbstractRawEncoding {
 
 	@Override
 	public int getType() {
-		return 6;
+		return RFBConstants.ENC_ZLIB;
 	}
 
 	@Override
@@ -28,7 +29,7 @@ public class ZLIBEncoding extends AbstractRawEncoding {
 	}
 
 	@Override
-	public void processEncodedRect(RFBDisplay display, int x, int y, int width,
+	public void processEncodedRect(RFBDisplay<?,?> display, int x, int y, int width,
 			int height, int encodingType) throws IOException {
 		try {
 			ProtocolEngine engine = display.getEngine();

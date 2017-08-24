@@ -14,7 +14,7 @@ import com.sshtools.rfbcommon.TightCapability;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
 
-public class ExtendedDesktopSizeEncoding extends AbstractRawEncoding implements RFBServerEncoding {
+public class ExtendedDesktopSizeEncoding extends AbstractEncoding<ScreenData> {
 	final static Logger LOG = LoggerFactory.getLogger(ExtendedDesktopSizeEncoding.class);
 
 	public ExtendedDesktopSizeEncoding() {
@@ -28,9 +28,10 @@ public class ExtendedDesktopSizeEncoding extends AbstractRawEncoding implements 
 		return true;
 	}
 
-	public void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
+	public void encode(UpdateRectangle<ScreenData> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
-		ScreenData data = client.getDisplayDriver().getExtendedScreenData();
+		ScreenData data = update.getData();
+		dout.writeInt(getType().getCode());
 		dout.writeByte(data.getDetails().size());
 		dout.write(new byte[3]);
 		for (ScreenDetail d : data.getDetails()) {
@@ -44,4 +45,7 @@ public class ExtendedDesktopSizeEncoding extends AbstractRawEncoding implements 
 		dout.flush();
 	}
 
+	@Override
+	public void selected(RFBClient client) {
+	}
 }

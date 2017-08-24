@@ -17,7 +17,7 @@ import com.sshtools.rfbserver.DisplayDriver.PointerShape;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
 
-public class XCursorEncoding extends AbstractEncoding {
+public class XCursorEncoding extends AbstractEncoding<PointerShape> {
 	final static Logger LOG = LoggerFactory.getLogger(XCursorEncoding.class);
 
 	public XCursorEncoding() {
@@ -31,10 +31,10 @@ public class XCursorEncoding extends AbstractEncoding {
 		return true;
 	}
 
-	public void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
+	public void encode(UpdateRectangle<PointerShape> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
 		LOG.info("Sending X cursor shape update");
-		PointerShape pc = (PointerShape) update.getData();
+		PointerShape pc = update.getData();
 		BufferedImage pointerImg = pc.getData();
 		int height = update.getArea().height;
 		int width = update.getArea().width;

@@ -31,7 +31,7 @@ public class FilteredDisplayDriver extends AbstractDisplayDriver {
 			}
 		};
 		screenBoundsListener = new ScreenBoundsListener() {
-			public void resized(Rectangle newBounds, boolean clientInitiated) {
+			public void resized(ScreenData newBounds, boolean clientInitiated) {
 				filteredScreenBoundsChanged(newBounds, clientInitiated);
 			}
 		};
@@ -54,8 +54,8 @@ public class FilteredDisplayDriver extends AbstractDisplayDriver {
 			}
 		};
 		damageListener = new DamageListener() {
-			public void damage(String name, Rectangle rectangle, boolean important, int preferredEncoding) {
-				filteredDamageEvent(name, rectangle, important);
+			public void damage(String name, Rectangle rectangle, int preferredEncoding) {
+				filteredDamageEvent(name, rectangle);
 			}
 		};
 		pointerListener = new PointerListener() {
@@ -86,8 +86,8 @@ public class FilteredDisplayDriver extends AbstractDisplayDriver {
 		firePointerChange(change);
 	}
 
-	protected void filteredDamageEvent(String name, Rectangle rectangle, boolean important) {
-		fireDamageEvent(name, rectangle, important, -1);
+	protected void filteredDamageEvent(String name, Rectangle rectangle) {
+		fireDamageEvent(name, rectangle, -1);
 	}
 
 	protected void filteredWindowClosed(String name, Rectangle rectangle) {
@@ -106,7 +106,7 @@ public class FilteredDisplayDriver extends AbstractDisplayDriver {
 		fireWindowMoved(name, rectangle, oldRectangle);
 	}
 
-	protected void filteredScreenBoundsChanged(Rectangle rectangle, boolean clientInitiated) {
+	protected void filteredScreenBoundsChanged(ScreenData rectangle, boolean clientInitiated) {
 		fireScreenBoundsChanged(rectangle, clientInitiated);
 	}
 

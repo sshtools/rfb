@@ -12,7 +12,7 @@ import com.sshtools.rfbcommon.TightCapability;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
 
-public class JPEGQualityLevel0 implements RFBServerEncoding {
+public class JPEGQualityLevel0 implements RFBServerEncoding<Void> {
 	final static Logger LOG = LoggerFactory.getLogger(JPEGQualityLevel0.class);
 
 	public int getCode() {
@@ -47,7 +47,7 @@ public class JPEGQualityLevel0 implements RFBServerEncoding {
 		return level;
 	}
 
-	public void encode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
+	public void encode(UpdateRectangle<Void> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
 		throw new UnsupportedOperationException();
 	}

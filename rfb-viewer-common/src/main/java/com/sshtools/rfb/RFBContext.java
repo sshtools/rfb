@@ -1,17 +1,42 @@
 /* HEADER */
 package com.sshtools.rfb;
 
-import java.util.List;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sshtools.rfb.encoding.CORREEncoding;
+import com.sshtools.rfb.encoding.CompressLevel0Encoding;
+import com.sshtools.rfb.encoding.CompressLevel1Encoding;
+import com.sshtools.rfb.encoding.CompressLevel2Encoding;
+import com.sshtools.rfb.encoding.CompressLevel3Encoding;
+import com.sshtools.rfb.encoding.CompressLevel4Encoding;
+import com.sshtools.rfb.encoding.CompressLevel5Encoding;
+import com.sshtools.rfb.encoding.CompressLevel6Encoding;
+import com.sshtools.rfb.encoding.CompressLevel7Encoding;
+import com.sshtools.rfb.encoding.CompressLevel8Encoding;
+import com.sshtools.rfb.encoding.CompressLevel9Encoding;
+import com.sshtools.rfb.encoding.ContinuousUpdatesEncoding;
 import com.sshtools.rfb.encoding.CopyRectEncoding;
 import com.sshtools.rfb.encoding.CursorPositionEncoding;
 import com.sshtools.rfb.encoding.HextileEncoding;
+import com.sshtools.rfb.encoding.JPEGQuality0Encoding;
+import com.sshtools.rfb.encoding.JPEGQuality1Encoding;
+import com.sshtools.rfb.encoding.JPEGQuality2Encoding;
+import com.sshtools.rfb.encoding.JPEGQuality3Encoding;
+import com.sshtools.rfb.encoding.JPEGQuality4Encoding;
+import com.sshtools.rfb.encoding.JPEGQuality5Encoding;
+import com.sshtools.rfb.encoding.JPEGQuality6Encoding;
+import com.sshtools.rfb.encoding.JPEGQuality7Encoding;
+import com.sshtools.rfb.encoding.JPEGQuality8Encoding;
+import com.sshtools.rfb.encoding.JPEGQuality9Encoding;
 import com.sshtools.rfb.encoding.LastRectEncoding;
 import com.sshtools.rfb.encoding.RFBResizeEncoding;
 import com.sshtools.rfb.encoding.RREEncoding;
@@ -22,15 +47,15 @@ import com.sshtools.rfb.encoding.TightPNGEncoding;
 import com.sshtools.rfb.encoding.XCursorEncoding;
 import com.sshtools.rfb.encoding.ZLIBEncoding;
 import com.sshtools.rfb.encoding.ZRLEEncoding;
+import com.sshtools.rfbcommon.RFBConstants;
 
 /**
  * Defines the configuration of an RFB protocol session including available
  * encodings and general preferences.
  */
 public class RFBContext implements Serializable {
-
+	final static Logger LOG = LoggerFactory.getLogger(RFBContext.class);
 	private static final long serialVersionUID = 1413968852790401177L;
-
 	public final static int PIXEL_FORMAT_AUTO = 0;
 	public final static int PIXEL_FORMAT_8_BIT = 1;
 	public final static int PIXEL_FORMAT_8_BIT_INDEXED = 2;
@@ -38,30 +63,9 @@ public class RFBContext implements Serializable {
 	public final static int PIXEL_FORMAT_16_BIT = 4;
 	public final static int PIXEL_FORMAT_32_BIT_24_BIT_COLOUR = 5;
 	public final static int PIXEL_FORMAT_32_BIT = 6;
-	// Not sure about these two
-
-	// Supported pixel encoding formats
-	public final static int ENCODING_RAW = 0;
-	public final static int ENCODING_COPYRECT = 1;
-	public final static int ENCODING_RRE = 2;
-	public final static int ENCODING_CORRE = 4;
-	public final static int ENCODING_HEXTILE = 5;
-	public final static int ENCODING_ZLIB = 6;
-	public final static int ENCODING_TIGHT = 7;
-
-	// Additional masks for encoding settings
-	final static int MASK_ENCODING_COMPRESS_LEVEL = 0xFFFFFF00;
-	final static int MASK_ENCODING_JPEG_QUALITY = 0xFFFFFFE0;
-	final static int MASK_ENCODING_LAST_RECT = 0xFFFFFF20;
-	final static int MASK_ENCODING_NEW_SIZE = 0xFFFFFF21;
-	final static int MASK_ENCODING_XCURSOR = 0xFFFFFF10;
-	final static int MASK_ENCODING_RICHCURSOR = 0xFFFFFF11;
-	final static int MASK_ENCODING_POINTERPOS = 0xFFFFFF18;
-
-	private transient Map<String, RFBEncoding> encodings = new HashMap<String, RFBEncoding>();
-
-	private int preferredEncoding = ENCODING_TIGHT;
-	private int compressLevel = 8;
+	private transient Map<Integer, RFBEncoding> encodings = new HashMap<Integer, RFBEncoding>();
+	private int preferredEncoding = RFBConstants.ENC_TIGHT;
+	private int compressLevel = 0;
 	private int screenSizePolicy = 0;
 	private int scaleMode = -1;
 	private boolean useCopyRect;
@@ -79,6 +83,8 @@ public class RFBContext implements Serializable {
 	private int screenUpdateTimeout = 0;
 	private int deferUpdateRequests = 20;
 	private boolean adaptive;
+	private boolean continuousUpdates = false;
+	private boolean continuousUpdatesSupported;
 
 	public RFBContext() {
 		resetEncodings();
@@ -95,30 +101,66 @@ public class RFBContext implements Serializable {
 		registerEncoding(new ZLIBEncoding());
 		registerEncoding(new ZRLEEncoding());
 		registerEncoding(new RFBResizeEncoding());
+		// registerEncoding(new ExtendedDesktopSizeEncoding());
+		registerEncoding(new ContinuousUpdatesEncoding());
 		registerEncoding(new LastRectEncoding());
 		registerEncoding(new TightEncoding());
 		registerEncoding(new TightPNGEncoding());
 		registerEncoding(new XCursorEncoding());
 		registerEncoding(new RichCursorEncoding());
 		registerEncoding(new CursorPositionEncoding());
+		registerEncoding(new JPEGQuality0Encoding());
+		registerEncoding(new JPEGQuality1Encoding());
+		registerEncoding(new JPEGQuality2Encoding());
+		registerEncoding(new JPEGQuality3Encoding());
+		registerEncoding(new JPEGQuality4Encoding());
+		registerEncoding(new JPEGQuality5Encoding());
+		registerEncoding(new JPEGQuality6Encoding());
+		registerEncoding(new JPEGQuality7Encoding());
+		registerEncoding(new JPEGQuality8Encoding());
+		registerEncoding(new JPEGQuality9Encoding());
+		registerEncoding(new CompressLevel0Encoding());
+		registerEncoding(new CompressLevel1Encoding());
+		registerEncoding(new CompressLevel2Encoding());
+		registerEncoding(new CompressLevel3Encoding());
+		registerEncoding(new CompressLevel4Encoding());
+		registerEncoding(new CompressLevel5Encoding());
+		registerEncoding(new CompressLevel6Encoding());
+		registerEncoding(new CompressLevel7Encoding());
+		registerEncoding(new CompressLevel8Encoding());
+		registerEncoding(new CompressLevel9Encoding());
+	}
+
+	public boolean isContinuousUpdatesSupported() {
+		return continuousUpdatesSupported;
+	}
+
+	public void setContinuousUpdatesSupported(boolean continuousUpdatesSupported) {
+		this.continuousUpdatesSupported = continuousUpdatesSupported;
+	}
+
+	public boolean isContinuousUpdates() {
+		return continuousUpdates;
+	}
+
+	public void setContinuousUpdates(boolean continuousUpdates) {
+		this.continuousUpdates = continuousUpdates;
 	}
 
 	public void registerEncoding(RFBEncoding encoder) {
-		encodings.put(String.valueOf(encoder.getType()), encoder);
+		encodings.put(encoder.getType(), encoder);
 	}
 
 	public RFBEncoding selectEncoding(int encoding) throws IOException {
-		RFBEncoding rfbEnc = (RFBEncoding) encodings.get(String
-				.valueOf(encoding));
+		RFBEncoding rfbEnc = encodings.get(encoding);
 		if (rfbEnc == null) {
-			throw new IOException("Unsupported encoding type! type="
-					+ String.valueOf(encoding));
+			throw new IOException("Unsupported encoding type! type=" + encoding);
 		}
 		return rfbEnc;
 	}
 
 	public RFBEncoding getEncoding(int i) {
-		return (RFBEncoding) encodings.get(String.valueOf(i));
+		return encodings.get(i);
 	}
 
 	public int getPreferredEncoding() {
@@ -206,52 +248,52 @@ public class RFBContext implements Serializable {
 	}
 
 	public int[] getEncodings() {
-
 		List<Integer> v = new ArrayList<Integer>();
-
 		if (requestCursorUpdates) {
-			v.add(new Integer(MASK_ENCODING_RICHCURSOR)); // Rich Cursor
-			v.add(new Integer(MASK_ENCODING_XCURSOR)); // X Cursor
-
+			v.add(RFBConstants.ENC_RICH_CURSOR);
+			v.add(RFBConstants.ENC_X11_CURSOR);
 			if (!ignoreCursorUpdates) {
-				v.add(new Integer(MASK_ENCODING_POINTERPOS)); // Pointer
-																// pos
+				v.add(RFBConstants.ENC_POINTER_POS);
 			}
 		}
-
 		v.add(new Integer(preferredEncoding));
-
 		if (useCopyRect) {
-			v.add(new Integer(ENCODING_COPYRECT));
+			v.add(RFBConstants.ENC_COPYRECT);
 		}
-
 		for (RFBEncoding e : encodings.values()) {
-			if (e.getType() != preferredEncoding
-					&& e.getType() != ENCODING_COPYRECT
-					&& !e.isPseudoEncoding()) {
-				v.add(new Integer(e.getType()));
+			if (e.getType() != preferredEncoding && e.getType() != RFBConstants.ENC_COPYRECT && !e.isPseudoEncoding()) {
+				v.add(e.getType());
 			}
 		}
-
-		if (preferredEncoding == ENCODING_ZLIB
-				|| preferredEncoding == ENCODING_TIGHT) {
+		if (preferredEncoding == RFBConstants.ENC_ZLIB || preferredEncoding == RFBConstants.ENC_TIGHT
+				|| preferredEncoding == RFBConstants.ENC_TIGHT_PNG) {
 			if (compressLevel >= 0 && compressLevel <= 9) {
-				v.add(new Integer(MASK_ENCODING_COMPRESS_LEVEL + compressLevel));
+				v.add(new Integer(RFBConstants.ENC_COMPRESS_LEVEL0 + compressLevel));
 			}
 		}
-
-		if (preferredEncoding == ENCODING_TIGHT && jpegQuality > -1) {
-			v.add(new Integer(MASK_ENCODING_JPEG_QUALITY + jpegQuality));
+		if ((preferredEncoding == RFBConstants.ENC_TIGHT || preferredEncoding == RFBConstants.ENC_TIGHT_PNG) && jpegQuality > -1) {
+			v.add(new Integer(RFBConstants.ENC_JPEG_QUALITY_LEVEL0 + jpegQuality));
 		}
-
-		v.add(new Integer(MASK_ENCODING_LAST_RECT));
-		v.add(new Integer(MASK_ENCODING_NEW_SIZE));
-
+		v.add(RFBConstants.ENC_LAST_RECT);
+		v.add(RFBConstants.ENC_NEW_FB_SIZE);
+		v.add(RFBConstants.ENC_CONTINUOUS_UPDATES);
+		// v.add(RFBConstants.ENC_EXTENDED_FB_SIZE);
+		for (Iterator<Integer> it = v.iterator(); it.hasNext();) {
+			int id = it.next();
+			if (getEncoding(id) == null) {
+				LOG.warn(String.format("Removing missing encoding %d", id));
+				it.remove();
+			}
+		}
 		int[] ret = new int[v.size()];
 		for (int i = 0; i < v.size(); i++) {
 			ret[i] = v.get(i);
 		}
 		return ret;
+	}
+
+	public boolean isUseExtendedDesktopSize() {
+		return false;
 	}
 
 	public void setCursorUpdateTimeout(int cursorUpdateTimeout) {
@@ -304,6 +346,5 @@ public class RFBContext implements Serializable {
 
 	public void setViewOnly(boolean viewOnly) {
 		this.viewOnly = viewOnly;
-
 	}
 }

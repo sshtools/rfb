@@ -10,7 +10,7 @@ import com.sshtools.rfb.swing.SwingRFBToolkit.RFBAWTColor;
 import com.sshtools.rfb.swing.SwingRFBToolkit.RFBBufferedImage;
 
 public class RFBGraphics2D implements RFBGraphicsContext {
-	Graphics2D g2d;
+	private Graphics2D g2d;
 
 	public RFBGraphics2D(Graphics2D g2d) {
 		this.g2d = g2d;

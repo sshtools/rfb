@@ -9,7 +9,7 @@ import com.sshtools.rfbcommon.TightCapability;
 public interface RFBAuthenticator {
 
 	public class NoAuthentication implements RFBAuthenticator {
-		public int getSecurityType() throws AuthenticationException {
+		public int getSecurityType() {
 			return RFBConstants.SCHEME_NO_AUTHENTICATION;
 		}
 
@@ -42,7 +42,7 @@ public interface RFBAuthenticator {
 	
 	TightCapability getCapability();
 
-	int getSecurityType() throws AuthenticationException;
+	int getSecurityType();
 
 	boolean process(RFBClient rfbClient) throws AuthenticationException;
 

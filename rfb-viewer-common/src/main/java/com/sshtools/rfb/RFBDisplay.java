@@ -5,6 +5,7 @@ import com.sshtools.rfb.RFBToolkit.RFBCursor;
 
 public interface RFBDisplay<C, K>  {
 	// Desktop scaling
+	public final static int RESIZE_DESKTOP = -1;
 	public final static int NO_SCALING = 0;
 	public final static int NEAREST_NEIGHBOR = 1;
 	public final static int BILINEAR = 2;

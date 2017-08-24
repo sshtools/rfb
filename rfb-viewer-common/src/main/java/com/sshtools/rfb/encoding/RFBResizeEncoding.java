@@ -4,6 +4,10 @@ import java.io.IOException;
 
 import com.sshtools.rfb.RFBDisplay;
 import com.sshtools.rfb.RFBEncoding;
+import com.sshtools.rfbcommon.RFBConstants;
+import com.sshtools.rfbcommon.ScreenData;
+import com.sshtools.rfbcommon.ScreenDetail;
+import com.sshtools.rfbcommon.ScreenDimension;
 
 public class RFBResizeEncoding implements RFBEncoding {
 	public RFBResizeEncoding() {
@@ -11,7 +15,7 @@ public class RFBResizeEncoding implements RFBEncoding {
 
 	@Override
 	public int getType() {
-		return 0xFFFFFF21;
+		return RFBConstants.ENC_NEW_FB_SIZE;
 	}
 
 	@Override
@@ -20,14 +24,16 @@ public class RFBResizeEncoding implements RFBEncoding {
 	}
 
 	@Override
-	public void processEncodedRect(RFBDisplay display, int x, int y, int width,
-			int height, int encodingType) throws IOException {
-		display.getDisplayModel().changeFramebufferSize(width, height);
+	public void processEncodedRect(RFBDisplay<?, ?> display, int x, int y, int width, int height, int encodingType)
+			throws IOException {
+		ScreenDimension dim = new ScreenDimension(width, height);
+		ScreenData sd = new ScreenData(dim);
+		sd.getDetails().add(new ScreenDetail(0, 0, 0, dim, 0));
+		display.getDisplayModel().changeFramebufferSize(ExtendedDesktopSizeEncoding.SERVER_SIDE_CHANGE, sd);
 	}
 
 	@Override
 	public String getName() {
 		return "Resize";
 	}
-
 }

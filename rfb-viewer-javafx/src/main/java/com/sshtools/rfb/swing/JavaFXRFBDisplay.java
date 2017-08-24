@@ -125,7 +125,7 @@ public class JavaFXRFBDisplay implements RFBDisplay<Node, KeyEvent> {
 
 	@Override
 	public void resizeComponent() {
-		if (context.getScaleMode() == NO_SCALING) {
+		if (context.getScaleMode() == NO_SCALING || context.getScaleMode() == RESIZE_DESKTOP) {
 			canvas.setWidth(displayModel.getRfbWidth());
 			canvas.setHeight(displayModel.getRfbHeight());
 		}

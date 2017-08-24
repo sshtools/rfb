@@ -19,6 +19,7 @@ import com.sshtools.rfbcommon.ProtocolReader;
 import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbcommon.RFBConstants;
 import com.sshtools.rfbcommon.RFBVersion;
+import com.sshtools.rfbcommon.ScreenData;
 import com.sshtools.rfbserver.DisplayDriver.DamageListener;
 import com.sshtools.rfbserver.DisplayDriver.PointerListener;
 import com.sshtools.rfbserver.DisplayDriver.PointerShape;
@@ -30,8 +31,8 @@ import com.sshtools.rfbserver.drivers.FilteredDisplayDriver;
 import com.sshtools.rfbserver.files.RFBServerFS;
 import com.sshtools.rfbserver.files.tight.TightFileTransferProtocolExtension;
 import com.sshtools.rfbserver.files.uvnc.UVNCFileTransferProtocolExtension;
-import com.sshtools.rfbserver.protocol.BufferUpdate;
 import com.sshtools.rfbserver.protocol.ClientCutTextProtocolExtension;
+import com.sshtools.rfbserver.protocol.EnableContinuousUpdatesProtocolExtension;
 import com.sshtools.rfbserver.protocol.KeyboardEventProtocolExtension;
 import com.sshtools.rfbserver.protocol.NewEncodingsProtocolExtension;
 import com.sshtools.rfbserver.protocol.NewPixelFormatProtocolExtension;
@@ -42,11 +43,8 @@ import com.sshtools.rfbserver.protocol.Reply;
 import com.sshtools.rfbserver.protocol.SetDesktopSizeExtension;
 import com.sshtools.rfbserver.transport.RFBServerTransport;
 
-public class RFBClient
-		implements DamageListener, PointerListener, ScreenBoundsListener, WindowListener, UpdateListener {
-
+public class RFBClient implements DamageListener, PointerListener, ScreenBoundsListener, WindowListener, UpdateListener {
 	final static Logger LOG = LoggerFactory.getLogger(RFBClient.class);
-
 	private RFBVersion version = new RFBVersion();
 	private RFBClientContext server;
 	private ProtocolReader din;
@@ -67,20 +65,18 @@ public class RFBClient
 	private Object writeLock = new Object();
 	private Map<Integer, ProtocolExtension> protocolExtensions = new HashMap<Integer, ProtocolExtension>();
 	private boolean colorMapSent;
-	private List<BufferUpdate> requestedUpdates = new ArrayList<>();
+	private Rectangle requestedArea = new Rectangle(0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	private boolean looping;
 	private boolean forceSoftCursor = false;
+	private boolean continuousUpdates;
 
 	public RFBClient(RFBClientContext server, DisplayDriver underlyingDriver) {
 		encoder = new RFBEncoder(this);
-
 		this.server = server;
-
 		actualDisplayDriver = underlyingDriver;
 		displayDriver = new SoftPointerDisplayDriver(underlyingDriver);
 		currentCursor = displayDriver.getPointerShape();
 		cursorPosition = displayDriver.getPointerPosition();
-
 		protocolExtensions.put(RFBConstants.SMSG_FILE_TRANSFER, new UVNCFileTransferProtocolExtension());
 		protocolExtensions.put(RFBConstants.SMSG_TIGHT_FILETRANSFER, new TightFileTransferProtocolExtension());
 		protocolExtensions.put(RFBConstants.CMSG_CUT_TEXT, new ClientCutTextProtocolExtension());
@@ -88,6 +84,7 @@ public class RFBClient
 		protocolExtensions.put(RFBConstants.CMSG_KEYBOARD_EVENT, new KeyboardEventProtocolExtension());
 		protocolExtensions.put(RFBConstants.CMSG_SET_ENCODINGS, new NewEncodingsProtocolExtension());
 		protocolExtensions.put(RFBConstants.CMSG_SET_PIXEL_FORMAT, new NewPixelFormatProtocolExtension());
+		protocolExtensions.put(RFBConstants.CMSG_ENABLE_CONTINUOUS_UPDATES, new EnableContinuousUpdatesProtocolExtension());
 		protocolExtensions.put(RFBConstants.CMSG_SET_DESKTOP_SIZE, new SetDesktopSizeExtension());
 	}
 
@@ -150,24 +147,18 @@ public class RFBClient
 	public void run(RFBServerTransport transport, Runnable... onUpdate) throws IOException {
 		try {
 			encoder.resetEncodings();
-
 			din = new ProtocolReader(transport.getInputStream());
 			dout = new ProtocolWriter(transport.getOutputStream());
-
 			// Server Protocol version
-
 			LOG.info("Server version is " + server.getVersion());
 			dout.write(server.getVersion().formatVersion());
 			dout.flush();
-
 			// Read in the version the client actually wants
 			byte[] buf = new byte[12];
 			din.readFully(buf);
 			version.determineVersion(buf);
 			LOG.info("Client version is " + version);
-
 			List<RFBAuthenticator> securityHandlers = new ArrayList<RFBAuthenticator>(server.getSecurityHandlers());
-
 			// Authentication method
 			while (true) {
 				securityType = null;
@@ -183,7 +174,6 @@ public class RFBClient
 							dout.write(a.getSecurityType());
 						}
 						dout.flush();
-
 						// Wait for clients decision
 						int chosen = din.read();
 						LOG.info("Client chose " + chosen);
@@ -204,8 +194,7 @@ public class RFBClient
 									+ ", which only supports 'None' or 'VNC' authentication. This server has not been configured to support these.");
 						}
 						LOG.info("Offering legacy authentication methods");
-						LOG.info("    " + securityType.getClass().getSimpleName() + " ("
-								+ securityType.getSecurityType() + ")");
+						LOG.info("    " + securityType.getClass().getSimpleName() + " (" + securityType.getSecurityType() + ")");
 						dout.writeInt(securityType.getSecurityType());
 						dout.flush();
 					}
@@ -215,7 +204,6 @@ public class RFBClient
 					dout.writeString(e.getMessage());
 					return;
 				}
-
 				// Authentication itself
 				try {
 					LOG.info("Processing " + securityType.getClass().getSimpleName());
@@ -225,7 +213,6 @@ public class RFBClient
 							dout.writeInt(0);
 							dout.flush();
 						}
-
 						// Leave the loop
 						break;
 					} else {
@@ -246,11 +233,9 @@ public class RFBClient
 					}
 				} catch (AuthenticationException ae) {
 					LOG.error("Authentication error.", ae);
-
 					if (version.compareTo(RFBVersion.VERSION_3_8) < 0) {
 						throw new IOException("Disconnecting because failed authentication.");
 					}
-
 					dout.writeInt(1);
 					if (version.compareTo(RFBVersion.VERSION_3_8) >= 0) {
 						dout.writeString(ae.getMessage());
@@ -258,10 +243,8 @@ public class RFBClient
 					return;
 				}
 			}
-
 			// ClientINit
 			share = din.read() == 1;
-
 			// ServerInit
 			int width = displayDriver.getWidth();
 			dout.writeShort(width);
@@ -269,7 +252,6 @@ public class RFBClient
 			dout.writeShort(height);
 			LOG.info("Sending desktop size of " + width + " x " + height);
 			preferredPixelFormat.write(dout);
-
 			// Set the pixel format we are actually going to use. This is a copy
 			// of
 			// the current preferred format, so we start off as 'direct', i.e
@@ -279,27 +261,22 @@ public class RFBClient
 			pixelFormat = new PixelFormat(preferredPixelFormat);
 			// pixelFormat.setImageType(BufferedImage.TYPE_CUSTOM);
 			// pixelFormat.setType(Type.DIRECT);
-
 			// Send the desktop name
 			LOG.info("Writing desktop name " + server.getConfiguration().getDesktopName());
 			dout.writeString(server.getConfiguration().getDesktopName());
 			dout.flush();
-
 			// Hooks
 			LOG.info("Doing post authentication");
 			securityType.postAuthentication(this);
-
 			updateLoop(onUpdate);
-
 		} finally {
 			displayDriver.destroy();
 			transport.stop();
 		}
-
 	}
 
 	public boolean isUseSoftCursor() {
-		if(forceSoftCursor)
+		if (forceSoftCursor)
 			return true;
 		boolean noCursorShapeUpdates = !encoder.isEncodingEnabled(RFBConstants.ENC_X11_CURSOR)
 				&& !encoder.isEncodingEnabled(RFBConstants.ENC_RICH_CURSOR);
@@ -327,7 +304,6 @@ public class RFBClient
 
 	private void updateLoop(Runnable... onUpdate) throws IOException {
 		looping = true;
-
 		displayDriver.addDamageListener(this);
 		displayDriver.addPointerListener(this);
 		displayDriver.addScreenBoundsListener(this);
@@ -339,19 +315,16 @@ public class RFBClient
 			while (looping) {
 				for (Runnable r : onUpdate)
 					r.run();
-
 				// if (pixelFormat.isNativeFormat() && !colorMapSent &&
 				// !pixelFormat.isTrueColor()) {
 				if (!colorMapSent && !pixelFormat.isTrueColor()) {
 					sendColourMapEntries();
 				}
-
 				// Have some updates
 				List<Reply<?>> s = encoder.popUpdates();
 				for (Reply<?> r : s) {
 					sendReply(r);
 				}
-
 				if (din.available() == 0) {
 					encoder.waitForUpdates(50);
 				} else {
@@ -367,12 +340,8 @@ public class RFBClient
 						if (!ready) {
 							ready = true;
 						}
-
 						if (msg == RFBConstants.CMSG_REQUEST_FRAMEBUFFER_UPDATE) {
-							synchronized (requestedUpdates) {
-								// TODO actually do something with this!
-								requestedUpdates.add(clientRequestsFramebufferUpdate());
-							}
+							requestedArea = clientRequestsFramebufferUpdate();
 						} else {
 							ProtocolExtension pext = protocolExtensions.get(msg);
 							if (pext != null) {
@@ -381,7 +350,6 @@ public class RFBClient
 								throw new IOException("Unexpected request " + msg);
 							}
 						}
-
 						if (!encoder.isPointerShapeSent()) {
 							encoder.pointerShapeSent();
 							LOG.info("First done");
@@ -424,25 +392,30 @@ public class RFBClient
 		dout.writeShort(g);
 		short b = (short) ((i << 8) & 0xff00);
 		dout.writeShort(b);
-		LOG.debug(String.format("Map %d to %s %s %s", idx, Integer.toHexString(r), Integer.toHexString(g),
-				Integer.toHexString(b)));
+		LOG.debug(String.format("Map %d to %s %s %s", idx, Integer.toHexString(r), Integer.toHexString(g), Integer.toHexString(b)));
 	}
 
 	public Object getWriteLock() {
 		return writeLock;
 	}
 
-	protected BufferUpdate clientRequestsFramebufferUpdate() throws IOException {
-		BufferUpdate update;
+	protected Rectangle clientRequestsFramebufferUpdate() throws IOException {
+		Rectangle update;
 		// Client requested update
 		boolean incremental = din.read() > 0;
-		update = new BufferUpdate(incremental, din.readUnsignedShort(), din.readUnsignedShort(),
-				din.readUnsignedShort(), din.readUnsignedShort());
-
-		// If a full update, remove all other queued framebuffer
-		// updates
+		update = new Rectangle(din.readUnsignedShort(), din.readUnsignedShort(), din.readUnsignedShort(), din.readUnsignedShort());
+		/* If a full update, remove all other queued framebuffer updates */
 		if (!incremental) {
-			encoder.frameUpdate(displayDriver, update.getArea(), -1);
+			encoder.frameUpdate(displayDriver, update, true, -1);
+			if (encoder.getEnabledEncoding(RFBConstants.ENC_EXTENDED_FB_SIZE) != null) {
+				encoder.resizeWindow(displayDriver, displayDriver.getExtendedScreenData(), false);
+			}
+			/* Ignore the request because full update has already been sent */
+			return null;
+		} else {
+			/* Ignore this request entirely if continuous updates are active */
+			if (continuousUpdates)
+				return null;
 		}
 		return update;
 	}
@@ -459,14 +432,14 @@ public class RFBClient
 			if (useSoftCursor) {
 				if (currentCursor != null && cursorPosition != null) {
 					Rectangle currentCursorBounds = getCursorBounds(cursorPosition, currentCursor);
-					encoder.frameUpdate(actualDisplayDriver, currentCursorBounds, true, -1);
+					encoder.frameUpdate(actualDisplayDriver, currentCursorBounds, -1);
 				}
 			} else {
 				encoder.pointerPositionUpdate(displayDriver, x, y);
 			}
 			cursorPosition = p;
 			if (useSoftCursor && currentCursor != null) {
-				encoder.frameUpdate(displayDriver, newBounds, true, -1);
+				encoder.frameUpdate(displayDriver, newBounds, -1);
 			}
 			// sendQueuedReplies();
 			// }
@@ -474,9 +447,9 @@ public class RFBClient
 		}
 	}
 
-	public void resized(Rectangle newBounds, boolean clientInitiated) {
+	public void resized(ScreenData newBounds, boolean clientInitiated) {
 		if (ready) {
-			encoder.resizeWindow(displayDriver, newBounds.width, newBounds.height, clientInitiated);
+			encoder.resizeWindow(displayDriver, newBounds, clientInitiated);
 		}
 	}
 
@@ -484,9 +457,9 @@ public class RFBClient
 		encoder.queueUpdate(update);
 	}
 
-	public void damage(String name, Rectangle rectangle, boolean important, int preferredEncoding) {
+	public void damage(String name, Rectangle rectangle, int preferredEncoding) {
 		if (ready) {
-			encoder.frameUpdate(displayDriver, rectangle, important, preferredEncoding);
+			encoder.frameUpdate(displayDriver, rectangle, preferredEncoding);
 			// try {
 			// sendQueuedFrames();
 			// } catch (IOException e) {
@@ -523,8 +496,7 @@ public class RFBClient
 					if (LOG.isDebugEnabled()) {
 						LOG.debug("Queueing soft cursor shape change at " + cursorPosition);
 					}
-					encoder.frameUpdate(actualDisplayDriver, getCursorBounds(cursorPosition, currentCursor), true,
-							RFBConstants.ENC_RAW);
+					encoder.frameUpdate(actualDisplayDriver, getCursorBounds(cursorPosition, currentCursor), RFBConstants.ENC_RAW);
 				}
 			} else {
 				if (LOG.isDebugEnabled()) {
@@ -569,7 +541,6 @@ public class RFBClient
 	}
 
 	class SoftPointerDisplayDriver extends FilteredDisplayDriver {
-
 		public SoftPointerDisplayDriver(DisplayDriver underlyingDriver) {
 			super(underlyingDriver, false);
 			try {
@@ -585,8 +556,7 @@ public class RFBClient
 				Rectangle cursorBounds = getCursorBounds(cursorPosition, currentCursor);
 				System.out.println("SOFT POINT: " + cursorBounds + " / " + area);
 				if (cursorBounds.intersects(area)) {
-					img.getGraphics().drawImage(currentCursor.getData(), cursorBounds.x - area.x,
-							cursorBounds.y - area.y, null);
+					img.getGraphics().drawImage(currentCursor.getData(), cursorBounds.x - area.x, cursorBounds.y - area.y, null);
 				}
 			}
 			return img;
@@ -600,25 +570,20 @@ public class RFBClient
 	public void moved(String name, Rectangle bounds, Rectangle oldBounds) {
 		if (ready) {
 			LOG.info("Window moved '" + name + "' (" + oldBounds + ", " + bounds + ")");
-
 			// Either new or old bounds may be null if the window has moved out
 			// of the viewport
-
 			if (oldBounds != null) {
 				oldBounds = new Rectangle(oldBounds);
-
 				// Take into account window borders - should be function of
 				// driver
 				// oldBounds.x -= 30;
 				// oldBounds.width += 60;
 				// oldBounds.y -= 50;
 				// oldBounds.height += 70;
-
-				encoder.frameUpdate(displayDriver, oldBounds, true, -1);
+				encoder.frameUpdate(displayDriver, oldBounds, -1);
 			}
-
 			if (bounds != null) {
-				encoder.frameUpdate(displayDriver, bounds, true, -1);
+				encoder.frameUpdate(displayDriver, bounds, -1);
 			}
 		}
 	}
@@ -626,23 +591,18 @@ public class RFBClient
 	public void resized(String name, Rectangle bounds, Rectangle oldBounds) {
 		if (ready) {
 			LOG.info("Window resized '" + name + "' (" + oldBounds + ", " + bounds + ")");
-
 			// Either new or old bounds may be null if the window has moved out
 			// of the viewport
-
 			if (oldBounds != null) {
 				oldBounds = new Rectangle(oldBounds);
-
 				// oldBounds.x -= 30;
 				// oldBounds.width += 60;
 				// oldBounds.y -= 50;
 				// oldBounds.height += 70;
-
-				encoder.frameUpdate(displayDriver, oldBounds, true, -1);
+				encoder.frameUpdate(displayDriver, oldBounds, -1);
 			}
-
 			if (bounds != null) {
-				encoder.frameUpdate(displayDriver, bounds, true, -1);
+				encoder.frameUpdate(displayDriver, bounds, -1);
 			}
 		}
 	}
@@ -671,4 +631,22 @@ public class RFBClient
 		return displayDriver;
 	}
 
+	public void setContinuousUpdates(boolean continuousUpdates) {
+		this.continuousUpdates = continuousUpdates;
+		if (!continuousUpdates) {
+			encoder.endContinuousUpdates(displayDriver);
+		}
+	}
+
+	public void setRequestedArea(Rectangle requestedArea) {
+		this.requestedArea = requestedArea;
+	}
+
+	public Rectangle getRequestedArea() {
+		return requestedArea;
+	}
+
+	public boolean isContinuousUpdates() {
+		return continuousUpdates;
+	}
 }

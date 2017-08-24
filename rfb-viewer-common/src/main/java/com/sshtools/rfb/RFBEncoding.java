@@ -10,7 +10,7 @@ public interface RFBEncoding {
 
   public boolean isPseudoEncoding();
 
-  public void processEncodedRect(RFBDisplay display, int x, int y, int width,
+  public void processEncodedRect(RFBDisplay<?,?> display, int x, int y, int width,
                                  int height, int encodingType) throws
       IOException;
 
