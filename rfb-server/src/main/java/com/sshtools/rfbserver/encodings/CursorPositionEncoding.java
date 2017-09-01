@@ -31,7 +31,7 @@ public class CursorPositionEncoding extends AbstractEncoding<Void> {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Send cursor position " + update.getArea().x + "," + update.getArea().y);
 		}
-		dout.writeInt(getType().getCode());
+		dout.writeUInt32(getType().getCode());
 	}
 
 	public void selected(RFBClient client) {

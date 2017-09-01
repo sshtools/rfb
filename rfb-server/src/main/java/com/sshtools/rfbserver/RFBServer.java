@@ -188,4 +188,8 @@ public class RFBServer implements RFBClientContext {
         }
         return null;
     }
+
+	public boolean isStarted() {
+		return transportFactory != null && transportFactory.isStarted();
+	}
 }

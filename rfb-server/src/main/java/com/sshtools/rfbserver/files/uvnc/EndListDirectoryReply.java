@@ -1,8 +1,8 @@
 package com.sshtools.rfbserver.files.uvnc;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbcommon.RFBConstants;
 
 public class EndListDirectoryReply extends FileTransfer<Integer> {
@@ -13,8 +13,8 @@ public class EndListDirectoryReply extends FileTransfer<Integer> {
     }
 
     @Override
-    protected void onWrite(DataOutputStream dout) throws IOException {
-        dout.writeInt(0);
+    protected void onWrite(ProtocolWriter dout) throws IOException {
+        dout.writeUInt32(0);
         dout.writeInt(data);
     }
 

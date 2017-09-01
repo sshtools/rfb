@@ -35,15 +35,16 @@ public abstract class AbstractRREEncoding extends AbstractRawEncoding<BufferedIm
 		int h = update.getArea().height;
 		List<SubRect> subrects = extractSubRects(pixels, background, w, h);
 		if (subrects.size() > SUBRECT_THRESHOLD) {
-			LOG.info("Number of subrects (" + (subrects.size()) + ") exceeds threshold of " + SUBRECT_THRESHOLD
+			if(LOG.isDebugEnabled())
+				LOG.debug("Number of subrects (" + (subrects.size()) + ") exceeds threshold of " + SUBRECT_THRESHOLD
 					+ ", reverting to raw");
 			byte[] array = prepareEncode(update, pixelFormat);
-			dout.writeInt(RFBConstants.ENC_RAW);
+			dout.writeUInt32(RFBConstants.ENC_RAW);
 			dout.write(array);
 			return;
 		}
-		dout.writeInt(getType().getCode());
-		dout.writeInt(subrects.size());
+		dout.writeUInt32(getType().getCode());
+		dout.writeUInt32(subrects.size());
 		writePixel(dout, pixelFormat, background);
 		for (SubRect s : subrects) {
 			writeSubrect(dout, pixelFormat, s);

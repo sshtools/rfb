@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbcommon.RFBConstants;
 import com.sshtools.rfbcommon.RFBFile;
 
@@ -15,8 +16,8 @@ public class ListDirectoryReply extends FileTransfer<RFBFile> {
     }
 
     @Override
-    protected void onWrite(DataOutputStream dout) throws IOException {
-        dout.writeInt(0); // Dunno
+    protected void onWrite(ProtocolWriter dout) throws IOException {
+        dout.writeUInt32(0); // Dunno
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);

@@ -63,6 +63,8 @@ public class ProtocolEngine implements Runnable {
 	private List<SecurityType> securityTypes = new ArrayList<SecurityType>();
 	private RFBVersion clientProtocolVersion = new RFBVersion(System.getProperty("rfb.version", RFBDisplay.VERSION_STRING));
 	private SecurityTypeFactory securityTypeFactory;
+	private boolean continuousUpdatesSupported;
+	private boolean useExtendedDesktopSize;
 
 	public ProtocolEngine(RFBDisplay<?, ?> display, RFBTransport transport, RFBContext context, RFBEventHandler prompt,
 			RFBDisplayModel displayModel, RFBImage emptyCursor, RFBImage dotCursor) {
@@ -212,7 +214,6 @@ public class ProtocolEngine implements Runnable {
 		processServerInitialization();
 		setPixelFormat();
 		setEncodings(context.getEncodings());
-		
 		displayModel.updateBuffer();
 		for (RFBFS fs : new RFBFS[] { new TightVNCFS(this), new UltraVNCFS(this) }) {
 			if (fs.isActive()) {
@@ -225,9 +226,8 @@ public class ProtocolEngine implements Runnable {
 
 	@SuppressWarnings("resource")
 	public void enableContinuousUpdates() throws IOException {
-		if (!context.isContinuousUpdatesSupported())
+		if (!isContinuousUpdatesSupported())
 			throw new UnsupportedOperationException();
-		
 		if (context.isContinuousUpdates()) {
 			LOG.info("Enabling continuous updates");
 			context.setContinuousUpdates(true);
@@ -254,7 +254,7 @@ public class ProtocolEngine implements Runnable {
 	 */
 	void setEncodings(int[] encs) throws IOException {
 		LOG.info("Chosen encodings :-");
-		for(int i : encs) {
+		for (int i : encs) {
 			LOG.info(String.format("    %s [%d]", context.getEncoding(i).getName(), i));
 		}
 		byte[] msg = new byte[4 + (4 * encs.length)];
@@ -469,7 +469,7 @@ public class ProtocolEngine implements Runnable {
 			// Notify display of new state
 			this.display.resizeComponent();
 			prompt.connected();
-			prompt.resized(displayModel.getRfbWidth(), displayModel.getRfbHeight());
+			prompt.remoteResize(displayModel.getRfbWidth(), displayModel.getRfbHeight());
 			// Start protocol thread
 			requestFullUpdate = true;
 			new Thread(this).start();
@@ -559,10 +559,8 @@ public class ProtocolEngine implements Runnable {
 					if (monitor != null && adapt()) {
 						fullUpdateNeeded = true;
 					}
-					
-					if(!context.isContinuousUpdates() || fullUpdateNeeded) 
+					if (!context.isContinuousUpdates() || fullUpdateNeeded)
 						requestFramebufferUpdate(0, 0, displayModel.getRfbWidth(), displayModel.getRfbHeight(), !fullUpdateNeeded);
-					
 					break;
 				case RFBConstants.SMSG_SET_COLORMAP:
 					readColourMap();
@@ -846,7 +844,7 @@ public class ProtocolEngine implements Runnable {
 	}
 
 	public boolean isProcessingEvents() {
-		return isProcessingEvents;
+		return isProcessingEvents && !isClosed;
 	}
 
 	/**
@@ -868,8 +866,20 @@ public class ProtocolEngine implements Runnable {
 		}
 	}
 
+	public boolean isContinuousUpdatesSupported() {
+		return continuousUpdatesSupported;
+	}
+
+	public void setContinuousUpdatesSupported(boolean continuousUpdatesSupported) {
+		this.continuousUpdatesSupported = continuousUpdatesSupported;
+	}
+
+	public boolean isUseExtendedDesktopSize() {
+		return useExtendedDesktopSize;
+	}
+
 	public void setDesktopSize(ScreenData screenData) throws IOException {
-		if (!context.isUseExtendedDesktopSize()) {
+		if (!isUseExtendedDesktopSize()) {
 			throw new IOException("Extended desktop size is not a supported encoding.");
 		}
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -882,6 +892,9 @@ public class ProtocolEngine implements Runnable {
 		paw.writeShort(screenData.getHeight());
 		List<ScreenDetail> a = screenData.getAllDetails();
 		paw.writeByte(a.size());
+		paw.writeByte(0);
+		LOG.info(String.format("Writing %d screens, primary is %dx%d", a.size(), screenData.getWidth(), screenData.getHeight()));
+		int scr = 1;
 		for (ScreenDetail d : a) {
 			paw.writeUInt32(d.getId());
 			paw.writeShort(d.getX());
@@ -889,6 +902,8 @@ public class ProtocolEngine implements Runnable {
 			paw.writeShort(d.getDimension().getWidth());
 			paw.writeShort(d.getDimension().getHeight());
 			paw.writeUInt32(d.getFlags());
+			LOG.info(String.format("    %2d [%10d] %dx%d@%d,%d (%d)", scr, d.getId(), d.getDimension().getWidth(), d.getDimension().getHeight(), d.getX(), d.getY(), d.getFlags()));
+			scr++;
 		}
 		synchronized (out) {
 			out.write(bout.toByteArray());
@@ -1226,5 +1241,9 @@ public class ProtocolEngine implements Runnable {
 
 	public ProtocolWriter getOutputStream() {
 		return out;
+	}
+
+	public void setUseExtendedDesktopSize(boolean useExtendedDesktopSize) {
+		this.useExtendedDesktopSize = useExtendedDesktopSize;
 	}
 }

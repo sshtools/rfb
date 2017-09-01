@@ -123,7 +123,8 @@ public class WindowOutlineDisplayDriver extends FilteredDisplayDriver {
 			windowName = name;
 			windowBounds = rectangle;
 			oldBounds = rectangle;
-			LOG.info("Starting to drag window " + name + " at " + windowBounds + " (" + move + " move)");
+			if(LOG.isDebugEnabled())
+				LOG.debug("Starting to drag window " + name + " at " + windowBounds + " (" + move + " move)");
 		}
 		newWindowBounds = rectangle;
 		if (timerThread != null) {
@@ -155,7 +156,8 @@ public class WindowOutlineDisplayDriver extends FilteredDisplayDriver {
 	}
 
 	protected void stoppedDrag(final boolean move) {
-		LOG.info("Stopped drag window " + windowName);
+		if(LOG.isDebugEnabled())
+			LOG.debug("Stopped drag window " + windowName);
 		if (timerThread != null) {
 			timerThread.interrupt();
 		}

@@ -35,7 +35,8 @@ public class CursorEncoding extends AbstractRawEncoding<PointerShape> {
 
 	public void encode(UpdateRectangle<PointerShape> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
-		LOG.info("Sending default cursor shape update in " + pixelFormat);
+		if(LOG.isDebugEnabled())
+			LOG.debug("Sending default cursor shape update in " + pixelFormat);
 		PointerShape pc = (PointerShape) update.getData();
 		BufferedImage img = pc.getData();
 		int height = update.getArea().height;
@@ -66,7 +67,7 @@ public class CursorEncoding extends AbstractRawEncoding<PointerShape> {
 		u.setData(compatImg);
 		byte[] pixelData = prepareEncode(u, pixelFormat);
 		/* Write out update */
-		dout.writeInt(getType().getCode());
+		dout.writeUInt32(getType().getCode());
 		dout.write(pixelData);
 		// And now write the mast
 		dout.write(array2);

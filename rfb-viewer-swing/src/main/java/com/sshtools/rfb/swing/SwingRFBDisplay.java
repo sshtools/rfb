@@ -37,11 +37,9 @@ import com.sshtools.rfb.swing.SwingRFBToolkit.RFBBufferedImage;
 import com.sshtools.rfbcommon.ScreenData;
 import com.sshtools.rfbcommon.ScreenDimension;
 
-import test.Test;
-
 public class SwingRFBDisplay extends JComponent
 		implements RFBDisplay<JComponent, KeyEvent>, KeyListener, MouseListener, MouseMotionListener {
-	final static Logger LOG = LoggerFactory.getLogger(Test.class);
+	final static Logger LOG = LoggerFactory.getLogger(SwingRFBDisplay.class);
 	private static final long serialVersionUID = 1L;
 	private ProtocolEngine engine;
 	private KeyListener keyListener;
@@ -73,18 +71,20 @@ public class SwingRFBDisplay extends JComponent
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
+				if (engine == null || !engine.isProcessingEvents())
+					return;
 				if (engine != null && SwingRFBDisplay.this.context.getScaleMode() != NO_SCALING) {
-//					if (SwingRFBDisplay.this.context.getScaleMode() == RESIZE_DESKTOP) {
-//						ScreenData sd = new ScreenData(displayModel.getScreenData());
-//						sd.getDimension()
-//								.set(new ScreenDimension(SwingRFBDisplay.this.getWidth(), SwingRFBDisplay.this.getHeight()));
-//						try {
-//							engine.setDesktopSize(sd);
-//						} catch (IOException e1) {
-//							LOG.warn("Failed to set remote desktop size.", e1);
-//						}
-//					} else
-						if (!displayModel.getScreenData().isEmpty())
+					if (SwingRFBDisplay.this.context.getScaleMode() == RESIZE_DESKTOP && engine.isUseExtendedDesktopSize()) {
+						ScreenData sd = new ScreenData(displayModel.getScreenData());
+						ScreenDimension dim = new ScreenDimension(SwingRFBDisplay.this.getWidth(),
+								SwingRFBDisplay.this.getHeight());
+						sd.getDimension().set(dim);
+						try {
+							engine.setDesktopSize(sd);
+						} catch (IOException e1) {
+							LOG.warn("Failed to set remote desktop size.", e1);
+						}
+					} else if (!displayModel.getScreenData().isEmpty())
 						displayModel.updateBuffer();
 				}
 			}

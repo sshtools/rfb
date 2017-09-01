@@ -33,7 +33,8 @@ public class XCursorEncoding extends AbstractEncoding<PointerShape> {
 
 	public void encode(UpdateRectangle<PointerShape> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
-		LOG.info("Sending X cursor shape update");
+		if(LOG.isDebugEnabled())
+			LOG.debug("Sending X cursor shape update");
 		PointerShape pc = update.getData();
 		BufferedImage pointerImg = pc.getData();
 		int height = update.getArea().height;
@@ -80,7 +81,7 @@ public class XCursorEncoding extends AbstractEncoding<PointerShape> {
 		int avgRed = totRed / pixels;
 		int avgGreen = totGreen / pixels;
 		int avgBlue = totBlue / pixels;
-		dout.writeInt(getType().getCode());
+		dout.writeUInt32(getType().getCode());
 		dout.write(avgRed);
 		dout.write(avgGreen);
 		dout.write(avgBlue);

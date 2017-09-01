@@ -26,6 +26,7 @@ import com.sshtools.rfb.encoding.CompressLevel9Encoding;
 import com.sshtools.rfb.encoding.ContinuousUpdatesEncoding;
 import com.sshtools.rfb.encoding.CopyRectEncoding;
 import com.sshtools.rfb.encoding.CursorPositionEncoding;
+import com.sshtools.rfb.encoding.ExtendedDesktopSizeEncoding;
 import com.sshtools.rfb.encoding.HextileEncoding;
 import com.sshtools.rfb.encoding.JPEGQuality0Encoding;
 import com.sshtools.rfb.encoding.JPEGQuality1Encoding;
@@ -84,7 +85,6 @@ public class RFBContext implements Serializable {
 	private int deferUpdateRequests = 20;
 	private boolean adaptive;
 	private boolean continuousUpdates = false;
-	private boolean continuousUpdatesSupported;
 
 	public RFBContext() {
 		resetEncodings();
@@ -101,7 +101,7 @@ public class RFBContext implements Serializable {
 		registerEncoding(new ZLIBEncoding());
 		registerEncoding(new ZRLEEncoding());
 		registerEncoding(new RFBResizeEncoding());
-		// registerEncoding(new ExtendedDesktopSizeEncoding());
+		registerEncoding(new ExtendedDesktopSizeEncoding());
 		registerEncoding(new ContinuousUpdatesEncoding());
 		registerEncoding(new LastRectEncoding());
 		registerEncoding(new TightEncoding());
@@ -129,14 +129,6 @@ public class RFBContext implements Serializable {
 		registerEncoding(new CompressLevel7Encoding());
 		registerEncoding(new CompressLevel8Encoding());
 		registerEncoding(new CompressLevel9Encoding());
-	}
-
-	public boolean isContinuousUpdatesSupported() {
-		return continuousUpdatesSupported;
-	}
-
-	public void setContinuousUpdatesSupported(boolean continuousUpdatesSupported) {
-		this.continuousUpdatesSupported = continuousUpdatesSupported;
 	}
 
 	public boolean isContinuousUpdates() {
@@ -277,7 +269,7 @@ public class RFBContext implements Serializable {
 		v.add(RFBConstants.ENC_LAST_RECT);
 		v.add(RFBConstants.ENC_NEW_FB_SIZE);
 		v.add(RFBConstants.ENC_CONTINUOUS_UPDATES);
-		// v.add(RFBConstants.ENC_EXTENDED_FB_SIZE);
+		 v.add(RFBConstants.ENC_EXTENDED_FB_SIZE);
 		for (Iterator<Integer> it = v.iterator(); it.hasNext();) {
 			int id = it.next();
 			if (getEncoding(id) == null) {
@@ -290,10 +282,6 @@ public class RFBContext implements Serializable {
 			ret[i] = v.get(i);
 		}
 		return ret;
-	}
-
-	public boolean isUseExtendedDesktopSize() {
-		return false;
 	}
 
 	public void setCursorUpdateTimeout(int cursorUpdateTimeout) {

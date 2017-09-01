@@ -23,7 +23,7 @@ public class RFBResizeEncoding extends AbstractEncoding<Void> {
 
 	public void encode(UpdateRectangle<Void> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
-		dout.writeInt(getType().getCode());
+		dout.writeUInt32(getType().getCode());
 	}
 
 	public void selected(RFBClient client) {

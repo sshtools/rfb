@@ -64,7 +64,7 @@ public class RFBRecorder implements RFBEventHandler {
 		}
 	}
 
-	public void resized(int width, int height) {
+	public void remoteResize(int width, int height) {
 		System.out.println("Display resized to " + width + "x" + height);
 	}
 }

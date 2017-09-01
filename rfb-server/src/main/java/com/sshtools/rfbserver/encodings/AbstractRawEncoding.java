@@ -6,7 +6,6 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 import java.awt.image.DataBufferUShort;
 import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -15,6 +14,7 @@ import java.nio.ShortBuffer;
 
 import com.sshtools.rfbcommon.ImageUtil;
 import com.sshtools.rfbcommon.PixelFormat;
+import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbserver.RFBClient;
 import com.sshtools.rfbserver.UpdateRectangle;
 
@@ -31,10 +31,10 @@ public abstract class AbstractRawEncoding<D> extends AbstractEncoding<D> {
     protected RFBClient client;
     protected ByteBuffer buf;
 
-    public void rawEncode(UpdateRectangle<?> update, DataOutputStream dout, PixelFormat pixelFormat) throws IOException {
+    public void rawEncode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat) throws IOException {
         @SuppressWarnings("unchecked")
         byte[] array = prepareEncode((UpdateRectangle<BufferedImage>) update, pixelFormat);
-        dout.writeInt(getType().getCode());
+        dout.writeUInt32(getType().getCode());
         dout.write(array);
     }
 

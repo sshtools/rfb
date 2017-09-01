@@ -1,10 +1,10 @@
 package com.sshtools.rfbserver.files.uvnc;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sshtools.rfbcommon.ProtocolWriter;
 import com.sshtools.rfbcommon.RFBConstants;
 
 public class ListDrivesReply extends FileTransfer<List<RFBDrive>> {
@@ -14,9 +14,9 @@ public class ListDrivesReply extends FileTransfer<List<RFBDrive>> {
     }
 
     @Override
-    protected void onWrite(DataOutputStream dout) throws IOException {
+    protected void onWrite(ProtocolWriter dout) throws IOException {
         StringBuilder bui = new StringBuilder();
-        dout.writeInt(0);
+        dout.writeUInt32(0);
         for(RFBDrive d : getData()) {
             bui.append(String.format("%-2s", d.getName()));
             bui.append(d.toCode());

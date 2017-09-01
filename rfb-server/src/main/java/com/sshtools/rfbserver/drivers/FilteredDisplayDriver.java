@@ -111,8 +111,8 @@ public class FilteredDisplayDriver extends AbstractDisplayDriver {
 	}
 
 	@Override
-	public void resize(ScreenData screen) {
-		underlyingDriver.resize(screen);
+	public boolean resize(ScreenData screen) {
+		return underlyingDriver.resize(screen);
 	}
 
 	protected void filteredUpdate(UpdateRectangle<?> update) {

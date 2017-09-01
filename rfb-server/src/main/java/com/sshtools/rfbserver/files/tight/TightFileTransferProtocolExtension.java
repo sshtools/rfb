@@ -101,7 +101,7 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
             return;
         }
         synchronized (client.getWriteLock()) {
-            output.writeInt(RFBConstants.CAP_FTSDSRLY_CODE);
+            output.writeUInt32(RFBConstants.CAP_FTSDSRLY_CODE);
             output.writeLong(dirSize); // make this 1 when compression supported
             output.flush();
         }
@@ -131,7 +131,7 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
             try {
                 byte[] cs = createChecksum(in, len);
                 synchronized (client.getWriteLock()) {
-                    output.writeInt(RFBConstants.CAP_FTSM5RLY_CODE);
+                    output.writeUInt32(RFBConstants.CAP_FTSM5RLY_CODE);
                     output.write(cs);
                     output.flush();
                 }
@@ -165,7 +165,7 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
     protected void compressionSupport() throws IOException {
         // TODO support compression
         synchronized (client.getWriteLock()) {
-            output.writeInt(RFBConstants.CAP_FTSCSRLY_CODE);
+            output.writeUInt32(RFBConstants.CAP_FTSCSRLY_CODE);
             output.write(0); // make this 1 when compression supported
             output.flush();
         }
@@ -177,7 +177,8 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
         if (!checkForFs(client)) {
             return;
         }
-        LOG.info("Sending " + sendingPath);
+		if(LOG.isDebugEnabled())
+			LOG.debug("Sending " + sendingPath);
         if (sendTarget != null) {
             try {
                 sendTarget.close();
@@ -186,7 +187,7 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
         }
         sendTarget = fs.retrieve(sendingPath, offset);
         synchronized (client.getWriteLock()) {
-            output.writeInt(RFBConstants.CAP_FTSFDRLY_CODE);
+            output.writeUInt32(RFBConstants.CAP_FTSFDRLY_CODE);
             output.flush();
         }
     }
@@ -216,7 +217,7 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
                 }
             } catch (EOFException e) {
                 synchronized (client.getWriteLock()) {
-                    output.writeInt(RFBConstants.CAP_FTSDERLY_CODE);
+                    output.writeUInt32(RFBConstants.CAP_FTSDERLY_CODE);
                     output.write(0);
                     RFBFile f = fs.get(sendingPath);
                     output.writeLong(f.getLastWriteTime());
@@ -227,10 +228,10 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
         }
 
         synchronized (client.getWriteLock()) {
-            output.writeInt(RFBConstants.CAP_FTSDDRLY_CODE);
+            output.writeUInt32(RFBConstants.CAP_FTSDDRLY_CODE);
             output.write(compress);
-            output.writeInt(read);
-            output.writeInt(read);
+            output.writeUInt32(read);
+            output.writeUInt32(read);
             output.write(b, 0, read);
             output.flush();
         }
@@ -265,7 +266,7 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
         }
 
         synchronized (client.getWriteLock()) {
-            output.writeInt(RFBConstants.CAP_FTSUDRLY_CODE);
+            output.writeUInt32(RFBConstants.CAP_FTSUDRLY_CODE);
             output.flush();
         }
     }
@@ -283,11 +284,12 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
             } catch (Exception e) {
             }
         }
-        LOG.info("Receiving " + receivePath);
+		if(LOG.isDebugEnabled())
+			LOG.debug("Receiving " + receivePath);
         boolean overwrite = (flags & 0x1) != 0;
         receiveTarget = fs.receive(receivePath, overwrite, offset);
         synchronized (client.getWriteLock()) {
-            output.writeInt(RFBConstants.CAP_FTSFURLY_CODE);
+            output.writeUInt32(RFBConstants.CAP_FTSFURLY_CODE);
             output.flush();
         }
     }
@@ -302,13 +304,14 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
             error("Not uploading.");
             return;
         }
-        LOG.info("Ending receive");
+		if(LOG.isDebugEnabled())
+			LOG.debug("Ending receive");
         try {
             receiveTarget.close();
             RFBFile f = fs.get(receivePath);
             f.setLastWriteTime(lastMod);
             synchronized (client.getWriteLock()) {
-                output.writeInt(RFBConstants.CAP_FTSUERLY_CODE);
+                output.writeUInt32(RFBConstants.CAP_FTSUERLY_CODE);
                 output.flush();
             }
         } catch (IOException ioe) {
@@ -325,14 +328,15 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
             return;
         }
         try {
-            LOG.info("Moving " + oldPath + " to " + newPath);
+    		if(LOG.isDebugEnabled())
+    			LOG.debug("Moving " + oldPath + " to " + newPath);
             fs.mv(oldPath, newPath);
         } catch (IOException ioe) {
             error(ioe);
             return;
         }
         synchronized (client.getWriteLock()) {
-            output.writeInt(RFBConstants.CAP_FTSFMRLY_CODE);
+            output.writeUInt32(RFBConstants.CAP_FTSFMRLY_CODE);
             output.flush();
         }
 
@@ -345,14 +349,15 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
             return;
         }
         try {
-            LOG.info("Removing " + path);
+    		if(LOG.isDebugEnabled())
+    			LOG.debug("Removing " + path);
             fs.rm(path);
         } catch (IOException ioe) {
             error(ioe);
             return;
         }
         synchronized (client.getWriteLock()) {
-            output.writeInt(RFBConstants.CAP_FTSFTRLY_CODE);
+            output.writeUInt32(RFBConstants.CAP_FTSFTRLY_CODE);
             output.flush();
         }
     }
@@ -371,7 +376,7 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
             return;
         }
         synchronized (client.getWriteLock()) {
-            output.writeInt(RFBConstants.CAP_FTSMDRLY_CODE);
+            output.writeUInt32(RFBConstants.CAP_FTSMDRLY_CODE);
             output.flush();
         }
 
@@ -393,7 +398,7 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
 
             // Build the compressable message
             ProtocolWriter pw = new ProtocolWriter(tempOut);
-            pw.writeInt(files.length);
+            pw.writeUInt32(files.length);
             for (RFBFile f : files) {
                 pw.writeLong(f.getSize());
                 pw.writeLong(f.getLastWriteTime());
@@ -417,10 +422,10 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
         }
 
         synchronized (client.getWriteLock()) {
-            output.writeInt(RFBConstants.CAP_FTSFLRLY_CODE);
+            output.writeUInt32(RFBConstants.CAP_FTSFLRLY_CODE);
             output.write(compression);
-            output.writeInt(compressedSize);
-            output.writeInt(uncompressedSize);
+            output.writeUInt32(compressedSize);
+            output.writeUInt32(uncompressedSize);
             output.write(compressedOut);
             output.flush();
         }
@@ -449,7 +454,7 @@ public class TightFileTransferProtocolExtension implements ProtocolExtension {
     private void writeError(String error) throws IOException, UnsupportedEncodingException {
         LOG.error("Failed. " + error);
         synchronized (client.getWriteLock()) {
-            output.writeInt(RFBConstants.CAP_FTSDSRLY_CODE);
+            output.writeUInt32(RFBConstants.CAP_FTSDSRLY_CODE);
             output.writeUTF8String(error);
             output.flush();
         }

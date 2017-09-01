@@ -195,12 +195,12 @@ public class RFBClient implements DamageListener, PointerListener, ScreenBoundsL
 						}
 						LOG.info("Offering legacy authentication methods");
 						LOG.info("    " + securityType.getClass().getSimpleName() + " (" + securityType.getSecurityType() + ")");
-						dout.writeInt(securityType.getSecurityType());
+						dout.writeUInt32(securityType.getSecurityType());
 						dout.flush();
 					}
 				} catch (AuthenticationException e) {
 					LOG.error("Authentication failed. ", e);
-					dout.writeInt(RFBConstants.SCHEME_CONNECT_FAILED);
+					dout.writeUInt32(RFBConstants.SCHEME_CONNECT_FAILED);
 					dout.writeString(e.getMessage());
 					return;
 				}
@@ -210,7 +210,7 @@ public class RFBClient implements DamageListener, PointerListener, ScreenBoundsL
 					if (securityType.process(this)) {
 						if (version.compareTo(RFBVersion.VERSION_3_8) >= 0
 								|| securityType.getSecurityType() != RFBConstants.SCHEME_NO_AUTHENTICATION) {
-							dout.writeInt(0);
+							dout.writeUInt32(0);
 							dout.flush();
 						}
 						// Leave the loop
@@ -236,7 +236,7 @@ public class RFBClient implements DamageListener, PointerListener, ScreenBoundsL
 					if (version.compareTo(RFBVersion.VERSION_3_8) < 0) {
 						throw new IOException("Disconnecting because failed authentication.");
 					}
-					dout.writeInt(1);
+					dout.writeUInt32(1);
 					if (version.compareTo(RFBVersion.VERSION_3_8) >= 0) {
 						dout.writeString(ae.getMessage());
 					}
@@ -286,6 +286,7 @@ public class RFBClient implements DamageListener, PointerListener, ScreenBoundsL
 
 	private void sendReply(Reply<?> reply) throws IOException {
 		synchronized (writeLock) {
+//			LOG.info("REPLY " + reply);
 			dout.write(reply.getCode());
 			reply.write(dout);
 			dout.flush();
@@ -352,7 +353,7 @@ public class RFBClient implements DamageListener, PointerListener, ScreenBoundsL
 						}
 						if (!encoder.isPointerShapeSent()) {
 							encoder.pointerShapeSent();
-							LOG.info("First done");
+							LOG.info("Sent initial cursor shape");
 							pointerChange(currentCursor);
 						}
 					}

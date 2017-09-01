@@ -1,4 +1,4 @@
-package com.sshtools.rfb.swing;
+package com.sshtools.rfb.javafx;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

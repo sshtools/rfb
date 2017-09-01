@@ -59,7 +59,8 @@ public abstract class AbstractDisplayDriver implements DisplayDriver {
 	}
 
 	@Override
-	public void resize(ScreenData screen) {
+	public boolean resize(ScreenData screen) {
+		return false;
 	}
 
 	@Override

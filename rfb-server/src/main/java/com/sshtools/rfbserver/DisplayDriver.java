@@ -160,7 +160,7 @@ public interface DisplayDriver {
 
 	BufferedImage grabArea(Rectangle area);
 	
-	void resize(ScreenData screen);
+	boolean resize(ScreenData screen);
 
 	ScreenData getExtendedScreenData();
 }

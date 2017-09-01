@@ -39,15 +39,23 @@ public class ExtendedDesktopSizeEncoding implements RFBEncoding {
 	@Override
 	public void processEncodedRect(RFBDisplay<?, ?> display, int x, int y, int width, int height, int encodingType)
 			throws IOException {
+		if (!display.getEngine().isUseExtendedDesktopSize()) {
+			LOG.info("Using extended desktop size.");
+			display.getEngine().setUseExtendedDesktopSize(true);
+		}
 		ProtocolReader in = display.getEngine().getInputStream();
 		int originOfChange = x;
 		int status = y;
 		int noOfScreens = in.readUnsignedByte();
 		in.skip(3);
 		ScreenData sd = new ScreenData(new ScreenDimension(width, height));
+		LOG.info(String.format("%d screens. Primary is %dx%d", noOfScreens, sd.getWidth(), sd.getHeight()));
 		for (int i = 0; i < noOfScreens; i++) {
-			sd.getDetails().add(new ScreenDetail(in.readUInt32(), in.readUnsignedShort(), in.readUnsignedShort(),
-					new ScreenDimension(in.readUnsignedShort(), in.readUnsignedShort()), in.readUInt32()));
+			ScreenDetail d = new ScreenDetail(in.readUInt32(), in.readUnsignedShort(), in.readUnsignedShort(),
+					new ScreenDimension(in.readUnsignedShort(), in.readUnsignedShort()), in.readUInt32());
+			sd.getDetails().add(d);
+			LOG.info(String.format("    %2d [%10d] %dx%d@%d,%d (%d)", i + 1, d.getId(), d.getWidth(), d.getHeight(), d.getX(),
+					d.getY(), d.getFlags()));
 		}
 		/* Ignore if the change originated from us */
 		if (originOfChange != CLIENT_SIDE_CHANGE) {

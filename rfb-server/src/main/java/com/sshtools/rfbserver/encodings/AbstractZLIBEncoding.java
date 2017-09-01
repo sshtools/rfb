@@ -56,21 +56,21 @@ public abstract class AbstractZLIBEncoding extends AbstractRawEncoding<BufferedI
 		outputStream.close();
 		deflater.end();
 		byte[] data = outputStream.toByteArray();
-		dout.writeInt(getType().getCode());
-		dout.writeInt(data.length);
+		dout.writeUInt32(getType().getCode());
+		dout.writeUInt32(data.length);
 		dout.write(data);
 		dout.flush();
 	}
 
-	public synchronized void jzlibEncode(UpdateRectangle<?> update, DataOutputStream dout, PixelFormat pixelFormat,
+	public synchronized void jzlibEncode(UpdateRectangle<?> update, ProtocolWriter dout, PixelFormat pixelFormat,
 			RFBClient client) throws IOException {
 		byte[] uncompressed = prepareEncode((UpdateRectangle<BufferedImage>) update, pixelFormat);
 		ByteArrayOutputStream compressOut = compress(uncompressed);
 		// Write the actual message
-		dout.writeInt(getType().getCode());
+		dout.writeUInt32(getType().getCode());
 		byte[] out = compressOut.toByteArray();
 		int length = out.length;
-		dout.writeInt(length);
+		dout.writeUInt32(length);
 		dout.write(out);
 	}
 

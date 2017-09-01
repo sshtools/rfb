@@ -40,7 +40,7 @@ public class HextileEncoding extends AbstractRawEncoding<BufferedImage> {
 	public void encode(UpdateRectangle<BufferedImage> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
 		BufferedImage img = update.getData();
-		dout.writeInt(getType().getCode());
+		dout.writeUInt32(getType().getCode());
 		int tileSize = 16;
 		int tileWidth = tileSize;
 		int tileHeight = tileSize;

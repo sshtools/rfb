@@ -70,7 +70,7 @@ public class RFBPlayer extends JFrame implements RFBEventHandler {
 		System.out.println("Disconnected");
 	}
 
-	public void resized(int width, int height) {
+	public void remoteResize(int width, int height) {
 		System.out.println("Resized " + width + "x" + height);
 		Insets i = ((FramePeer) getPeer()).getInsets();
 		width -= i.left + i.right;

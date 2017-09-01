@@ -31,16 +31,16 @@ public class ExtendedDesktopSizeEncoding extends AbstractEncoding<ScreenData> {
 	public void encode(UpdateRectangle<ScreenData> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
 		ScreenData data = update.getData();
-		dout.writeInt(getType().getCode());
+		dout.writeUInt32(getType().getCode());
 		dout.writeByte(data.getDetails().size());
 		dout.write(new byte[3]);
 		for (ScreenDetail d : data.getDetails()) {
-			dout.writeInt((int) d.getId());
+			dout.writeUInt32(d.getId());
 			dout.writeShort((short) d.getX());
 			dout.writeShort((short) d.getY());
 			dout.writeShort((short) d.getDimension().getWidth());
 			dout.writeShort((short) d.getDimension().getHeight());
-			dout.writeInt((int) d.getFlags());
+			dout.writeUInt32(d.getFlags());
 		}
 		dout.flush();
 	}

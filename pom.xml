@@ -56,7 +56,10 @@
 		<module>rfb-server</module>
 		<module>rfb-server-linux</module>
 		<module>rfb-server-windows</module>
+
 		<module>vnc-server</module>
+		<module>vnc-viewer-javafx</module>
+		<module>vnc-viewer-swing</module>
 	</modules>
 
 	<dependencies>

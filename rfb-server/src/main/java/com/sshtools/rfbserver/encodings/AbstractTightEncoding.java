@@ -32,12 +32,13 @@ public abstract class AbstractTightEncoding extends AbstractZLIBEncoding impleme
 	public void encode(UpdateRectangle<BufferedImage> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
 		BufferedImage img = update.getData();
-		dout.writeInt(getType().getCode());
+		dout.writeUInt32(getType().getCode());
 		// https://wiki.qemu.org/Features/VNC_Tight_PNG
 		// https://vncdotool.readthedocs.io/en/0.8.0/rfbproto.html#tight-encoding
 		int area = (int) update.getArea().getWidth() * (int) update.getArea().getHeight();
 		if (area > JPEG_THRESHOLD && tightLevel > -1) {
-			LOG.info(String.format("Sending JPEG of %s", update.getArea()));
+			if(LOG.isDebugEnabled())
+				LOG.debug(String.format("Sending JPEG of %s", update.getArea()));
 			ByteArrayOutputStream bout = new ByteArrayOutputStream(
 					(int) update.getArea().getWidth() * (int) update.getArea().getHeight());
 			encodeImage(img, bout, dout);
@@ -54,7 +55,8 @@ public abstract class AbstractTightEncoding extends AbstractZLIBEncoding impleme
 			pan.analyse(tileBuf, tileWidth * tileHeight);
 			if (pan.getPalette().length == 1) {
 				/* Fill */
-				LOG.info(String.format("Sending FILL of %d", pan.getPalette()[0]));
+				if(LOG.isDebugEnabled())
+					LOG.debug(String.format("Sending FILL of %d", pan.getPalette()[0]));
 				dout.writeByte(OP_FILL << 4);
 				TightUtil.writeTightColor(pan.getPalette()[0], pixelFormat, dout);
 			} else {

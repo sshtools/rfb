@@ -50,15 +50,18 @@ public class CopyRectDisplayDriver extends FilteredDisplayDriver {
 		if (oldRectangle != null && rectangle != null) {
 			UpdateRectangle<Point> update = new UpdateRectangle<Point>(this, rectangle, RFBConstants.ENC_COPYRECT);
 			update.setData(new Point(oldRectangle.x, oldRectangle.y));
-			LOG.info("Copyrect updated " + update);
+			if(LOG.isDebugEnabled())
+				LOG.debug("Copyrect updated " + update);
 			fireUpdate(update);
 			if (rectangle.intersects(oldRectangle)) {
 				for (Rectangle reducedRectangle : subtractRectangle(rectangle, oldRectangle)) {
-					LOG.info("Moved window damage at " + reducedRectangle);
+					if(LOG.isDebugEnabled())
+						LOG.debug("Moved window damage at " + reducedRectangle);
 					fireDamageEvent(name, reducedRectangle, -1);
 				}
 			} else {
-				LOG.info("Moved window damage at " + oldRectangle);
+				if(LOG.isDebugEnabled())
+					LOG.debug("Moved window damage at " + oldRectangle);
 				fireDamageEvent(name, oldRectangle, -1);
 			}
 		} else {
@@ -209,7 +212,9 @@ public class CopyRectDisplayDriver extends FilteredDisplayDriver {
 	}
 
 	protected static Rectangle reduce(Rectangle rectangle, Rectangle oldRectangle) {
-		LOG.info("Copyrect intersects " + rectangle + " / " + oldRectangle);
+
+		if(LOG.isDebugEnabled())
+			LOG.debug("Copyrect intersects " + rectangle + " / " + oldRectangle);
 
 		Rectangle reducedRectangle = new Rectangle(oldRectangle);
 

@@ -15,7 +15,7 @@ public interface RFBEventHandler {
 
 	void disconnected();
 
-	void resized(int width, int height);
+	void remoteResize(int width, int height);
 
 	void encodingChanged(RFBEncoding currentEncoding);
 }

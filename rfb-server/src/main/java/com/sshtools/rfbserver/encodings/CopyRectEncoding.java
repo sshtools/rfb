@@ -29,8 +29,9 @@ public class CopyRectEncoding extends AbstractEncoding<Point> {
 
 	public void encode(UpdateRectangle<Point> update, ProtocolWriter dout, PixelFormat pixelFormat, RFBClient client)
 			throws IOException {
-		LOG.info("CopyRect of " + update.getData() + " to " + update.getArea());
-		dout.writeInt(getType().getCode());
+		if(LOG.isDebugEnabled())
+			LOG.debug("CopyRect of " + update.getData() + " to " + update.getArea());
+		dout.writeUInt32(getType().getCode());
 		dout.writeShort(update.getData().x);
 		dout.writeShort(update.getData().y);
 	}

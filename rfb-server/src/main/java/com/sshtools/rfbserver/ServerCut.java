@@ -18,7 +18,7 @@ public class ServerCut extends Reply<Void> {
     @Override
     public void write(ProtocolWriter dout) throws IOException {
         dout.write(new byte[3]);
-        dout.writeInt(text.length());
+        dout.writeUInt32(text.length());
         dout.write(text.getBytes());
     }
 

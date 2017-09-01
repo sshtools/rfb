@@ -39,6 +39,14 @@ public class ScreenDetail {
 	public int getY() {
 		return y;
 	}
+	
+	public int getWidth() {
+		return dimension.getWidth();
+	}
+	
+	public int getHeight() {
+		return dimension.getHeight();
+	}
 
 	public long getFlags() {
 		return flags;

@@ -264,17 +264,17 @@ public class RFBEncoder {
 			return null;
 		}
 		boolean found = false;
-		if (full) {
+		Rectangle requestedArea = client.getRequestedArea();
+		if (full || requestedArea == null) {
 			found = true;
 		} else {
-			found = client.getRequestedArea().intersects(rectangle);
+			found = requestedArea.intersects(rectangle);
 		}
 		if (!found) {
 			/*
 			 * Neither using continuous requests mode nor is the update
 			 * intersecting any areas the client said they are interested in
 			 */
-			LOG.info("no :\\");
 			return null;
 		}
 		if (update == null) {

@@ -88,10 +88,10 @@ public class Tight extends AbstractAuth {
 			LOG.info("Processing Tight authentication");
 			ProtocolWriter output = rfbClient.getOutput();
 			// Tunnel types (currently zero)
-			output.writeInt(0);
+			output.writeUInt32(0);
 			output.flush();
 			// Auth types
-			output.writeInt(authenticationMethods.size());
+			output.writeUInt32(authenticationMethods.size());
 			if (!authenticationMethods.isEmpty()) {
 				for (RFBAuthenticator cap : authenticationMethods) {
 					if (cap.getCapability() != getCapability()) {

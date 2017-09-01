@@ -28,14 +28,15 @@ public class ContinuousUpdatesEncoding implements RFBEncoding {
 	@Override
 	public void processEncodedRect(RFBDisplay<?, ?> display, int x, int y, int width, int height, int encodingType)
 			throws IOException {
-		/* If we get this message at all then continuous updates are supported */
-		if (!display.getContext().isContinuousUpdatesSupported()) {
-			display.getContext().setContinuousUpdatesSupported(true);
+		/*
+		 * If we get this message at all then continuous updates are supported
+		 */
+		if (!display.getEngine().isContinuousUpdatesSupported()) {
+			display.getEngine().setContinuousUpdatesSupported(true);
 			if (display.getContext().isContinuousUpdates()) {
 				LOG.info("Continuous updates are supported and enabled");
 				display.getEngine().enableContinuousUpdates();
-			}
-			else {
+			} else {
 				LOG.info("Continuous updates are supported by server, but this client is not configured to use them.");
 			}
 		} else {

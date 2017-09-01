@@ -1,5 +1,5 @@
 /* HEADER */
-package com.sshtools.rfb.swing;
+package com.sshtools.rfb.javafx;
 
 import java.io.IOException;
 
@@ -11,8 +11,8 @@ import com.sshtools.rfb.RFBEventHandler;
 import com.sshtools.rfb.RFBRectangle;
 import com.sshtools.rfb.RFBToolkit;
 import com.sshtools.rfb.RFBToolkit.RFBCursor;
+import com.sshtools.rfb.javafx.JavaFXRFBToolkit.RFBJavaFXCursor;
 import com.sshtools.rfb.RFBTransport;
-import com.sshtools.rfb.swing.JavaFXRFBToolkit.RFBJavaFXCursor;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
