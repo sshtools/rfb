@@ -46,17 +46,15 @@
 	</developers>
 
 	<modules>
-		<module>rfb-common</module><!-- 
-		<module>rfb-viewer</module> -->
+		<module>rfb-common</module>
 		<module>rfb-viewer-common</module>
 		<module>rfb-viewer-swing</module>
-		<!-- <module>rfb-viewer-javafx</module> -->
+		<module>rfb-viewer-javafx</module>
 		<module>rfb-player</module>
 		<module>rfb-recorder</module>
 		<module>rfb-server</module>
 		<module>rfb-server-linux</module>
 		<module>rfb-server-windows</module>
-
 		<module>vnc-server</module>
 		<module>vnc-viewer-javafx</module>
 		<module>vnc-viewer-swing</module>
