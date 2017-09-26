@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sshtools.rfbcommon.ProtocolReader;
 import com.sshtools.rfbcommon.RFBConstants;
+import com.sshtools.rfbserver.EndContinuousUpdates;
 import com.sshtools.rfbserver.RFBClient;
 
 public class NewEncodingsProtocolExtension implements ProtocolExtension {
@@ -39,7 +40,7 @@ public class NewEncodingsProtocolExtension implements ProtocolExtension {
 			 * an 'End Continuous Updates' message to indicate we support continuous updates 
 			 **/
 			if(encoder.isEncodingEnabled(RFBConstants.ENC_CONTINUOUS_UPDATES)) {
-				encoder.endContinuousUpdates(rfbClient.getDisplayDriver());
+				encoder.queueUpdate(new EndContinuousUpdates());
 			}
 			
 			// Cursor shape updates may have been enabled or disabled,

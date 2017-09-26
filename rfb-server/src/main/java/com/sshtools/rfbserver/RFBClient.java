@@ -635,7 +635,7 @@ public class RFBClient implements DamageListener, PointerListener, ScreenBoundsL
 	public void setContinuousUpdates(boolean continuousUpdates) {
 		this.continuousUpdates = continuousUpdates;
 		if (!continuousUpdates) {
-			encoder.endContinuousUpdates(displayDriver);
+			encoder.queueUpdate(new EndContinuousUpdates());
 		}
 	}
 

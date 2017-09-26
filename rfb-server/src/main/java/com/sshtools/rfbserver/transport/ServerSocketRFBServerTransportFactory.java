@@ -49,7 +49,9 @@ public class ServerSocketRFBServerTransportFactory implements RFBServerTransport
 	}
 
 	public RFBServerTransport nextTransport() throws IOException {
-		LOG.info("Waiting for connection");
+		if(serverSocket == null)
+			return null;
+		LOG.info("Waiting for connection");		
 		return new SocketRFBServerTransport(serverSocket.accept());
 	}
 

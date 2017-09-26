@@ -567,6 +567,12 @@ public class ProtocolEngine implements Runnable {
 				case RFBConstants.SMSG_BELL:
 					RFBToolkit.get().beep();
 					break;
+				case RFBConstants.SMSG_END_CONTINUOUS_UPDATES:
+					if (display.getContext().isContinuousUpdates()) {
+						LOG.info("Turning off continuous updates");
+						display.getContext().setContinuousUpdates(false);
+					}
+					break;
 				case RFBConstants.SMSG_SERVER_CUT_TEXT:
 					String s = getServerCutText();
 					RFBToolkit.get().getClipboard().setData(s);

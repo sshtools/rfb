@@ -56,6 +56,7 @@ public interface RFBConstants {
 	public final static int SMSG_SERVER_CUT_TEXT = 3;
 	public final static int SMSG_FILE_TRANSFER = 7;
 	public final static int SMSG_TIGHT_FILETRANSFER = 252;
+	public final static int SMSG_END_CONTINUOUS_UPDATES = 150;
 	// Authenticaton scheme return values
 
 	public final static int SCHEME_CONNECT_FAILED = 0;

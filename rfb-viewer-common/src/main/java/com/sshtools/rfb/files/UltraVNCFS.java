@@ -197,7 +197,8 @@ public class UltraVNCFS implements RFBFS {
 		if (type == RFB_DIR_DRIVE_LIST || type == RFB_DIR_PACKET) {
 			readDirectory(contentParam);
 		} else {
-			throw new IOException("Was expecting a different file system result");
+			return false;
+//			throw new IOException("Was expecting a different file system result");
 		}
 		return true;
 	}

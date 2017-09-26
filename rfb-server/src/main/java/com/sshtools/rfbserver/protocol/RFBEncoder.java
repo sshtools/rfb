@@ -8,7 +8,6 @@ import java.awt.datatransfer.Transferable;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,10 +36,10 @@ import com.sshtools.rfbserver.encodings.CompressLevel6;
 import com.sshtools.rfbserver.encodings.CompressLevel7;
 import com.sshtools.rfbserver.encodings.CompressLevel8;
 import com.sshtools.rfbserver.encodings.CompressLevel9;
+import com.sshtools.rfbserver.encodings.ContinuousUpdatesEncoding;
 import com.sshtools.rfbserver.encodings.CopyRectEncoding;
 import com.sshtools.rfbserver.encodings.CursorEncoding;
 import com.sshtools.rfbserver.encodings.CursorPositionEncoding;
-import com.sshtools.rfbserver.encodings.ContinuousUpdatesEncoding;
 import com.sshtools.rfbserver.encodings.ExtendedDesktopSizeEncoding;
 import com.sshtools.rfbserver.encodings.HextileEncoding;
 import com.sshtools.rfbserver.encodings.JPEGQualityLevel0;
@@ -105,7 +104,7 @@ public class RFBEncoder {
 		addEncoding(new RFBResizeEncoding());
 		addEncoding(new CursorEncoding());
 		addEncoding(new CursorPositionEncoding());
-		addEncoding(new XCursorEncoding());
+//		addEncoding(new XCursorEncoding());
 		addEncoding(new CORREEncoding());
 		addEncoding(new CopyRectEncoding());
 		addEncoding(new ExtendedDesktopSizeEncoding());
@@ -165,15 +164,6 @@ public class RFBEncoder {
 				if (enabledEncodings.contains(e.getCode()))
 					return (T) e;
 			}
-		}
-		return null;
-	}
-
-	public UpdateRectangle<? extends Object> endContinuousUpdates(DisplayDriver displayDriver) {
-		ContinuousUpdatesEncoding resizeEncoding = getEnabledEncoding(ContinuousUpdatesEncoding.class);
-		if (resizeEncoding != null) {
-			return queueUpdate(
-					new UpdateRectangle<Void>(displayDriver, new Rectangle(0, 0, 0, 0), resizeEncoding.getType().getCode()));
 		}
 		return null;
 	}
