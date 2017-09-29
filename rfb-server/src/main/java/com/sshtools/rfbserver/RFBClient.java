@@ -280,8 +280,9 @@ public class RFBClient implements DamageListener, PointerListener, ScreenBoundsL
 			return true;
 		boolean noCursorShapeUpdates = !encoder.isEncodingEnabled(RFBConstants.ENC_X11_CURSOR)
 				&& !encoder.isEncodingEnabled(RFBConstants.ENC_RICH_CURSOR);
-		boolean noCursorPositionUpdates = !encoder.isEncodingEnabled(RFBConstants.ENC_POINTER_POS);
-		return noCursorShapeUpdates || noCursorPositionUpdates;
+//		boolean noCursorPositionUpdates = !encoder.isEncodingEnabled(RFBConstants.ENC_POINTER_POS);
+//		return noCursorShapeUpdates || noCursorPositionUpdates;
+		return noCursorShapeUpdates;
 	}
 
 	private void sendReply(Reply<?> reply) throws IOException {

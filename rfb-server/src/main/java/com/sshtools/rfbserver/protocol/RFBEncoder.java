@@ -104,7 +104,7 @@ public class RFBEncoder {
 		addEncoding(new RFBResizeEncoding());
 		addEncoding(new CursorEncoding());
 		addEncoding(new CursorPositionEncoding());
-//		addEncoding(new XCursorEncoding());
+		addEncoding(new XCursorEncoding());
 		addEncoding(new CORREEncoding());
 		addEncoding(new CopyRectEncoding());
 		addEncoding(new ExtendedDesktopSizeEncoding());
