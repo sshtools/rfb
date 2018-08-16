@@ -35,30 +35,30 @@ public interface RFBTransport {
 	 * Get the hostname of the remote computer. This is for informational
 	 * purposes only.
 	 * 
-	 * @return
+	 * @return hostname
 	 */
 	String getHostname();
 
 	/**
 	 * The InputStream for reading RFB data.
 	 * 
-	 * @return
-	 * @throws IOException
+	 * @return input stream of RFB data
+	 * @throws IOException on error
 	 */
 	InputStream getInputStream() throws IOException;
 
 	/**
 	 * The OutputStream to write RFB data.
 	 * 
-	 * @return
-	 * @throws IOException
+	 * @return output stream to write RFB data to
+	 * @throws IOException on error
 	 */
 	OutputStream getOutputStream() throws IOException;
 
 	/**
 	 * Close the connection and terminate the RFB protocol.
 	 * 
-	 * @throws IOException
+	 * @throws IOException on error
 	 */
 	void close() throws IOException;
 

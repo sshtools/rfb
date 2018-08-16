@@ -30,9 +30,9 @@ public class RFBSocketTransport extends java.net.Socket implements RFBTransport 
 	/**
 	 * Connect the socket.
 	 * 
-	 * @param hostname
-	 * @param port
-	 * @throws IOException
+	 * @param hostname hostname
+	 * @param port port
+	 * @throws IOException on error
 	 */
 	public RFBSocketTransport(String hostname, int port) throws IOException {
 		super(hostname, port);
