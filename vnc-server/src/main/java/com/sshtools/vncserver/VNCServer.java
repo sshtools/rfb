@@ -54,13 +54,10 @@ import com.sshtools.rfbserver.transport.SocketRFBServerTransportFactory;
 import com.sshtools.rfbserver.windows.Win32DisplayDriver;
 
 public class VNCServer implements RFBServerConfiguration {
-
 	public enum Mode {
 		listen, reverse
-
 	}
 
-	private static final char OPT_UPNP = 'u';
 	private static final char OPT_UPNP_EXTERNAL_PORT = 'x';
 	private static final char OPT_HELP = '?';
 	private static final char OPT_MODE = 'm';
@@ -75,7 +72,6 @@ public class VNCServer implements RFBServerConfiguration {
 	private static final char OPT_PASSWORD_FILE = 'f';
 	private static final char OPT_NO_OUTLINE_WINDOW_MOVEMENT = 'o';
 	private static final char OPT_LOG_LEVEL = 'l';
-
 	static Logger LOG;
 	private CommandLine cli;
 	private DisplayDriver driver;
@@ -98,43 +94,32 @@ public class VNCServer implements RFBServerConfiguration {
 
 	protected void addOptions(Options options) {
 		options.addOption(new Option(String.valueOf(OPT_HELP), "help", false, "Display help"));
-		options
-			.addOption(new Option(String.valueOf(OPT_MODE), "mode", true,
+		options.addOption(new Option(String.valueOf(OPT_MODE), "mode", true,
 				"Connection mode. May either be 'listen' (the default), or 'reverse' for to connect to a VNC viewer running in listen mode"));
 		options.addOption(new Option("e", "encodings", true, "Comma separated list of enabled encoding"));
 		options.addOption(new Option(String.valueOf(OPT_NO_NATIVE), "nonative", false,
-			"Do not use the native display driver, even if one is supported."));
+				"Do not use the native display driver, even if one is supported."));
 		options.addOption(new Option(String.valueOf(OPT_NO_SCAN), "noscan", false,
-			"Do not use the (slow) damage scanner, rely on native damage events (if supported)"));
+				"Do not use the (slow) damage scanner, rely on native damage events (if supported)"));
 		options.addOption(new Option(String.valueOf(OPT_NO_COPY_RECT), "nocopyrect", false,
 				"Do not use the CopyRect driver for window movement (if supported)"));
 		options.addOption(new Option(String.valueOf(OPT_LOG_LEVEL), "log", true, "Log level"));
-		options
-			.addOption(new Option(
-				String.valueOf(OPT_NO_OUTLINE_WINDOW_MOVEMENT),
-				"outline",
-				false,
+		options.addOption(new Option(String.valueOf(OPT_NO_OUTLINE_WINDOW_MOVEMENT), "outline", false,
 				"Disables the use of a 'wireframe' instead of the complete window contents when windows are moved or resized."));
-		options
-			.addOption(new Option(
-				String.valueOf(OPT_UPNP),
-				"upnp",
-				false,
-				"Use UPnP to advertise this server to your consumer router, allowing incomings connections from the internet. Only works in listen mode"));
 		options.addOption(new Option(String.valueOf(OPT_UPNP_EXTERNAL_PORT), "upnpport", false,
-			"The external port number to use if UPnP is enabled (defaults to same a listening port)"));
+				"The external port number to use if UPnP is enabled (defaults to same a listening port)"));
 		options.addOption(new Option(String.valueOf(OPT_VIEWPORT), "viewport", true,
-			"Serve either only a single monitor or an area of the entire desktop. To specify an area, use the format "
-				+ "<X>,<Y>,<Width>,<Height>. If you have multiple monitors, you can use the shorthand format of <Monitor Number> "
-				+ "instead."));
+				"Serve either only a single monitor or an area of the entire desktop. To specify an area, use the format "
+						+ "<X>,<Y>,<Width>,<Height>. If you have multiple monitors, you can use the shorthand format of <Monitor Number> "
+						+ "instead."));
 		options.addOption(new Option(String.valueOf(OPT_DESKTOP_NAME), "desktop", true,
-			"The desktop name. Some viewers may display this. Can be any text"));
-		options.addOption(new Option(String.valueOf(OPT_PASSWORD), "password", true,
-			"The password that clients must authenticate with."));
+				"The desktop name. Some viewers may display this. Can be any text"));
+		options.addOption(
+				new Option(String.valueOf(OPT_PASSWORD), "password", true, "The password that clients must authenticate with."));
 		options.addOption(new Option(String.valueOf(OPT_PASSWORD_FILE), "passwordfile", true,
-			"A file containing the password that clients must authenticate with."));
+				"A file containing the password that clients must authenticate with."));
 		options.addOption(new Option(String.valueOf(OPT_BACKLOG), "backlog", true,
-			"Maximum number of incoming connections that are allowed. Only applies in 'listen' mode"));
+				"Maximum number of incoming connections that are allowed. Only applies in 'listen' mode"));
 	}
 
 	private void start() throws Exception {
@@ -155,39 +140,31 @@ public class VNCServer implements RFBServerConfiguration {
 		Options options = new Options();
 		addOptions(options);
 		Parser parser = new GnuParser();
-
 		try {
 			cli = parser.parse(options, args);
-
 			// Debug level
 			String level = "warn";
 			if (cli.hasOption(OPT_LOG_LEVEL)) {
 				level = cli.getOptionValue(OPT_LOG_LEVEL);
 			}
 			System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", level);
-
 			LOG = LoggerFactory.getLogger(VNCServer.class);
-
 			// Help?
 			if (cli.hasOption(OPT_HELP)) {
 				printHelp(options);
 				return -1;
 			}
-
 			// Determine driver
 			if (SystemUtils.IS_OS_UNIX && !cli.hasOption(OPT_NO_NATIVE)) {
 				underlyingDriver = driver = new X11DisplayDriver();
-			}
-			else if (SystemUtils.IS_OS_WINDOWS && !cli.hasOption(OPT_NO_NATIVE)) {
+			} else if (SystemUtils.IS_OS_WINDOWS && !cli.hasOption(OPT_NO_NATIVE)) {
 				underlyingDriver = driver = new Win32DisplayDriver();
 			} else {
 				underlyingDriver = driver = new RobotDisplayDriver();
 			}
-
 			// Set view port
 			if (cli.hasOption(OPT_VIEWPORT)) {
 				WindowedDisplayDriver windowedDriver = new WindowedDisplayDriver(driver);
-
 				try {
 					String viewport = cli.getOptionValue(OPT_VIEWPORT);
 					if (viewport.indexOf(',') != -1) {
@@ -195,27 +172,23 @@ public class VNCServer implements RFBServerConfiguration {
 						if (rec.length != 4) {
 							throw new NumberFormatException();
 						}
-						windowedDriver.setArea(new Rectangle(Integer.parseInt(rec[0]), Integer.parseInt(rec[1]), Integer
-							.parseInt(rec[2]), Integer.parseInt(rec[3])));
-
+						windowedDriver.setArea(new Rectangle(Integer.parseInt(rec[0]), Integer.parseInt(rec[1]),
+								Integer.parseInt(rec[2]), Integer.parseInt(rec[3])));
 					} else {
 						windowedDriver.setMonitor(Integer.parseInt(viewport));
 					}
 				} catch (NumberFormatException nfe) {
 					throw new ParseException(
-						"Viewport must either be a single monitor number or a string specifying the bounds of the viewport in the format <X>,<Y>,<Width>,<Height>");
+							"Viewport must either be a single monitor number or a string specifying the bounds of the viewport in the format <X>,<Y>,<Width>,<Height>");
 				}
-
 				driver = windowedDriver;
 			}
-
 			// Add the damage driver (catches any damage not detected by the
 			// display
 			// driver)
 			if (!cli.hasOption(OPT_NO_SCAN)) {
 				driver = new DamageScannerDriver(driver, true);
 			}
-
 			// Add the window outline driver
 			if (!cli.hasOption(OPT_NO_OUTLINE_WINDOW_MOVEMENT)) {
 				driver = new WindowOutlineDisplayDriver(driver);
@@ -224,7 +197,6 @@ public class VNCServer implements RFBServerConfiguration {
 			if (!cli.hasOption(OPT_NO_COPY_RECT)) {
 				driver = new CopyRectDisplayDriver(driver);
 			}
-
 			// Listen mode
 			if (cli.hasOption(OPT_MODE)) {
 				try {
@@ -237,28 +209,14 @@ public class VNCServer implements RFBServerConfiguration {
 			case reverse:
 				serverTransportFactory = new SocketRFBServerTransportFactory();
 			default:
-				if (cli.hasOption(OPT_UPNP)) {
-					serverTransportFactory = new UPnPServerSocketTransportFactory();
-					if (cli.hasOption(OPT_UPNP_EXTERNAL_PORT)) {
-						try {
-							((UPnPServerSocketTransportFactory) serverTransportFactory).setExternalPort(Integer.parseInt(cli
-								.getOptionValue(OPT_UPNP_EXTERNAL_PORT)));
-						} catch (NumberFormatException nfe) {
-							throw new ParseException("Invalid external UPnP port number.");
-						}
-					}
-				} else {
-					serverTransportFactory = new ServerSocketRFBServerTransportFactory();
-				}
+				serverTransportFactory = new ServerSocketRFBServerTransportFactory();
 				break;
 			}
 			serverTransportFactory.init(this);
-
 			// Other options
 			if (cli.hasOption(OPT_DESKTOP_NAME)) {
 				desktopName = cli.getOptionValue(OPT_DESKTOP_NAME);
 			}
-
 			// Backlog
 			if (cli.hasOption(OPT_BACKLOG)) {
 				try {
@@ -267,7 +225,6 @@ public class VNCServer implements RFBServerConfiguration {
 					throw new ParseException("Invalid backlog.");
 				}
 			}
-
 			// Password
 			if (cli.hasOption(OPT_PASSWORD_FILE)) {
 				BufferedReader in = new BufferedReader(new FileReader(cli.getOptionValue(OPT_PASSWORD_FILE)));
@@ -279,7 +236,6 @@ public class VNCServer implements RFBServerConfiguration {
 			} else if (cli.hasOption(OPT_PASSWORD)) {
 				password = cli.getOptionValue(OPT_PASSWORD).toCharArray();
 			}
-
 			// Parse remaining arguments
 			String[] remainingArgs = cli.getArgs();
 			if (remainingArgs.length > 1) {
@@ -306,11 +262,9 @@ public class VNCServer implements RFBServerConfiguration {
 					}
 				}
 			}
-
 			// Output some info about the options chosen
 			LOG.info("Driver: " + driver);
 			LOG.info("Transport: " + serverTransportFactory.getClass().getSimpleName());
-
 			return 0;
 		} catch (ParseException pe) {
 			System.err.println(getClass().getName() + ": " + pe.getMessage() + " Use -? or --help for more information.");
@@ -331,7 +285,6 @@ public class VNCServer implements RFBServerConfiguration {
 		} else if (result > 0) {
 			System.exit(result);
 		}
-
 	}
 
 	public int getPort() {
@@ -359,11 +312,9 @@ public class VNCServer implements RFBServerConfiguration {
 			bui.append(String.valueOf(o));
 		}
 		return bui.toString();
-
 	}
 
 	public int getImageType() {
 		return imageType;
 	}
-
 }

@@ -131,11 +131,6 @@ Drivers for other platforms are in progress.</description>
 		</dependency>
 
 		<dependency>
-			<groupId>sbbi-upnplib</groupId>
-			<artifactId>sbbi-upnplib</artifactId>
-			<version>1.0.4</version>
-		</dependency>
-		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>rfb-server</artifactId>
 			<version>${project.version}</version>
@@ -164,14 +159,6 @@ Drivers for other platforms are in progress.</description>
 	</dependencies>
 
 	<repositories>
-		<repository>
-			<id>ext-releases</id>
-			<url>http://artifactory.javassh.com/ext-releases-local</url>
-			<releases />
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
 
 	</repositories>
 
