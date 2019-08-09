@@ -21,7 +21,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sshtools</groupId>
 	<artifactId>rfb</artifactId>
-	<version>3.0.0</version>
+	<version>3.0.1-SNAPSHOT</version>
 	<name>RFB</name>
 	<description>Java implementation of the RFB protocol (i.e. VNC) for both clients and servers.</description>
 	<url>http://www.sshtools.com</url>
