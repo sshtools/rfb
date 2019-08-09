@@ -191,7 +191,7 @@ public class RFBDisplayModel extends PixelFormat {
 		if (xover > 0) {
 			displayClip[2] -= xover;
 		}
-		int yover = (displayClip[0] + displayClip[3]) - my;
+		int yover = (displayClip[1] + displayClip[3]) - my;
 		if (yover > 0) {
 			displayClip[3] -= yover;
 		}
