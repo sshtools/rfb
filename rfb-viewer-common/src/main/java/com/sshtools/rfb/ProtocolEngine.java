@@ -1,3 +1,20 @@
+/**
+ * RFB - Remote Frame Buffer (VNC) implementation.
+ * Copyright © 2006 SSHTOOLS Limited (support@sshtools.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 /*
  */
 package com.sshtools.rfb;
@@ -351,12 +368,12 @@ public class ProtocolEngine implements Runnable {
 	/**
 	 * Request a frame buffer update from the server.
 	 * 
-	 * @param x
-	 * @param y
-	 * @param w
-	 * @param h
-	 * @param inc
-	 * @throws IOException
+	 * @param x x
+	 * @param y y
+	 * @param w w
+	 * @param h h
+	 * @param inc incremental
+	 * @throws IOException on any error
 	 */
 	public void requestFramebufferUpdate(int x, int y, int w, int h, boolean inc) throws IOException {
 		if (LOG.isDebugEnabled()) {
@@ -856,8 +873,8 @@ public class ProtocolEngine implements Runnable {
 	/**
 	 * Send the server some clipboard data
 	 * 
-	 * @param text
-	 * @throws IOException
+	 * @param text text
+	 * @throws IOException on any error
 	 */
 	public void sendClipboardText(String text) throws IOException {
 		byte[] msg = new byte[8 + text.length()];
@@ -961,8 +978,8 @@ public class ProtocolEngine implements Runnable {
 	/**
 	 * Encoded a key event into the current event message buffer
 	 * 
-	 * @param keysym
-	 * @param down
+	 * @param keysym keysym
+	 * @param down down
 	 */
 	public synchronized void encodeKeyEvent(int keysym, boolean down) {
 		eventBuffer[eventBufferPos++] = (byte) RFBConstants.CMSG_KEYBOARD_EVENT;
@@ -978,7 +995,7 @@ public class ProtocolEngine implements Runnable {
 	/**
 	 * Encode key modifiers into the event message buffer
 	 * 
-	 * @param newModifiers
+	 * @param newModifiers new modifiers
 	 */
 	public void encodeModifierKeyEvents(int newModifiers) {
 		if ((newModifiers & RFBDisplay.CTRL_MASK) != (oldModifiers & RFBDisplay.CTRL_MASK)) {
@@ -1053,23 +1070,14 @@ public class ProtocolEngine implements Runnable {
 		return displayModel;
 	}
 
-	/**
-	 * @param b
-	 */
 	public boolean isDisconnecting() {
 		return isDisconnecting;
 	}
 
-	/**
-	 * @param b
-	 */
 	public boolean isClosed() {
 		return isClosed;
 	}
 
-	/**
-	 * @return
-	 */
 	public RFBTransport getTransport() {
 		return transport;
 	}
@@ -1215,9 +1223,6 @@ public class ProtocolEngine implements Runnable {
 		this.initialPassword = initialPassword;
 	}
 
-	/**
-	 * @return
-	 */
 	public RFBEncoding getCurrentEncoding() {
 		return currentEncoding;
 	}
