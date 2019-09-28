@@ -34,7 +34,7 @@ Drivers for other platforms are in progress.</description>
 	<parent>
 		<groupId>com.sshtools</groupId>
 		<artifactId>rfb</artifactId>
-		<version>3.0.0</version>
+		<version>3.0.1</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<build>
@@ -90,7 +90,7 @@ Drivers for other platforms are in progress.</description>
 							</filters>
 							<artifactSet>
 								<excludes>
-									<exclude>${groupId}:${projectId}</exclude>
+									<exclude>${project.groupId}:${project.artifactId}</exclude>
 								</excludes>
 							</artifactSet>
 							<transformers>

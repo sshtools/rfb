@@ -26,7 +26,7 @@
 	<parent>
 		<groupId>com.sshtools</groupId>
 		<artifactId>rfb</artifactId>
-		<version>3.0.0</version>
+		<version>3.0.1</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<build>
@@ -50,10 +50,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
+				<version>3.8.2</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>

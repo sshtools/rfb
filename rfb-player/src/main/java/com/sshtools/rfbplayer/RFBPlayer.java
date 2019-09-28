@@ -1,5 +1,5 @@
 /**
- * RFB Player - Remote Frame Buffer Player. Plays files recorded by rfb-recorder
+	 * RFB Player - Remote Frame Buffer Player. Plays files recorded by rfb-recorder
  * Copyright © 2006 SSHTOOLS Limited (support@sshtools.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,10 +18,9 @@
 package com.sshtools.rfbplayer;
 
 import java.awt.BorderLayout;
-import java.awt.Insets;
+import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.peer.FramePeer;
 import java.io.File;
 import java.io.IOException;
 
@@ -46,7 +45,8 @@ public class RFBPlayer extends JFrame implements RFBEventHandler {
 		slider = new JSlider(0, 100);
 		getContentPane().add(slider, BorderLayout.SOUTH);
 		getContentPane().add(display, BorderLayout.CENTER);
-		setSize(800, 600);
+		display.setPreferredSize(new Dimension(800, 600));
+		pack();
 		setVisible(true);
 	}
 
@@ -88,11 +88,8 @@ public class RFBPlayer extends JFrame implements RFBEventHandler {
 	}
 
 	public void remoteResize(int width, int height) {
-		System.out.println("Resized " + width + "x" + height);
-		Insets i = ((FramePeer) getPeer()).getInsets();
-		width -= i.left + i.right;
-		height -= i.top + i.bottom;
-		setSize(width, height);
+		display.setPreferredSize(new Dimension(width, height));
+		pack();
 	}
 
 	public void encodingChanged(RFBEncoding currentEncoding) {
