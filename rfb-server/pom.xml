@@ -33,7 +33,7 @@ See the vncserver module for a concrete server implementation that has some nati
 	<parent>
 		<groupId>com.sshtools</groupId>
 		<artifactId>rfb</artifactId>
-		<version>3.0.2-SNAPSHOT-SNAPSHOT</version>
+		<version>3.0.2-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
